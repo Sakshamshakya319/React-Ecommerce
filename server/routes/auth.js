@@ -12,16 +12,23 @@ router.get('/test', (req, res) => {
   res.json({ 
     success: true, 
     message: 'Auth routes are working',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    availableRoutes: [
+      'POST /api/auth/register',
+      'POST /api/auth/login', 
+      'POST /api/auth/google-login',
+      'POST /api/auth/firebase-login',
+      'GET /api/auth/me'
+    ]
   })
 })
 
-// Simple test for Google login endpoint
-router.post('/test-google', (req, res) => {
+// Simple test for Google login endpoint accessibility
+router.get('/google-test', (req, res) => {
   res.json({
     success: true,
     message: 'Google login endpoint is accessible',
-    body: req.body
+    endpoint: 'POST /api/auth/google-login'
   })
 })
 

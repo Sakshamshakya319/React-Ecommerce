@@ -117,6 +117,15 @@ app.get('/', (req, res) => {
   })
 })
 
+// Simple test endpoint to verify server is working
+app.get('/test', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Server test endpoint working',
+    timestamp: new Date().toISOString()
+  })
+})
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({
