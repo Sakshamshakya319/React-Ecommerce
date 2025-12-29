@@ -6,7 +6,7 @@
  * @param {string} fallback - Fallback image path (default: placeholder)
  * @returns {string} - Reliable image URL
  */
-export const getReliableImageUrl = (imageUrl, fallback = '/placeholder-product.svg') => {
+export function getReliableImageUrl(imageUrl, fallback = '/placeholder-product.svg') {
   if (!imageUrl) return fallback
   
   // If it's already a data URL or external URL, return as is
@@ -22,11 +22,17 @@ export const getReliableImageUrl = (imageUrl, fallback = '/placeholder-product.s
   return imageUrl
 }
 
-// Alias for backward compatibility
-export const getImageUrl = getReliableImageUrl
+/**
+ * Get image URL - main export function
+ */
+export function getImageUrl(imageUrl, fallback = '/placeholder-product.svg') {
+  return getReliableImageUrl(imageUrl, fallback)
+}
 
-// Another alias for fallback functionality
-export const getFallbackImageUrl = (imageUrl, fallback = '/placeholder-product.svg') => {
+/**
+ * Get fallback image URL
+ */
+export function getFallbackImageUrl(imageUrl, fallback = '/placeholder-product.svg') {
   return getReliableImageUrl(imageUrl, fallback)
 }
 
@@ -35,7 +41,7 @@ export const getFallbackImageUrl = (imageUrl, fallback = '/placeholder-product.s
  * @param {Event} event - The error event
  * @param {string} fallback - Fallback image path
  */
-export const handleImageError = (event, fallback = '/placeholder-product.svg') => {
+export function handleImageError(event, fallback = '/placeholder-product.svg') {
   const img = event.target
   
   // Prevent infinite loop if fallback also fails
@@ -49,15 +55,21 @@ export const handleImageError = (event, fallback = '/placeholder-product.svg') =
   img.src = fallback
 }
 
-// Alias for backward compatibility
-export const createImageErrorHandler = (fallback) => (event) => handleImageError(event, fallback)
+/**
+ * Create image error handler function
+ */
+export function createImageErrorHandler(fallback = '/placeholder-product.svg') {
+  return function(event) {
+    handleImageError(event, fallback)
+  }
+}
 
 /**
  * Preload an image to check if it exists
  * @param {string} src - Image source URL
  * @returns {Promise<boolean>} - Promise that resolves to true if image loads
  */
-export const preloadImage = (src) => {
+export function preloadImage(src) {
   return new Promise((resolve) => {
     const img = new Image()
     img.onload = () => resolve(true)
@@ -72,7 +84,7 @@ export const preloadImage = (src) => {
  * @param {string} size - Size variant (thumbnail, medium, large)
  * @returns {string} - Optimized image URL
  */
-export const getOptimizedImageUrl = (imageUrl, size = 'medium') => {
+export function getOptimizedImageUrl(imageUrl, size = 'medium') {
   if (!imageUrl || imageUrl.startsWith('data:')) return imageUrl
   
   // For external URLs, return as is
