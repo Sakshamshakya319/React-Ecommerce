@@ -36,9 +36,9 @@ const AdminLogin = () => {
       
       console.log('Admin login response:', response.data)
       
-      if (response.data.success && response.data.token && response.data.admin) {
+      if (response.data.success && response.data.data.accessToken && response.data.data.admin) {
         // Use admin auth store
-        adminLogin(response.data.admin, response.data.token)
+        adminLogin(response.data.data.admin, response.data.data.accessToken)
         
         toast.success('Welcome to Admin Panel!')
         navigate('/admin')
