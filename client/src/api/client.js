@@ -6,8 +6,13 @@ import { STORAGE_KEYS } from '../store/authTypes'
 import toast from 'react-hot-toast'
 
 // Create axios instance
+const API_BASE =
+  (import.meta.env.VITE_API_URL && String(import.meta.env.VITE_API_URL).trim()) ||
+  (typeof window !== 'undefined' && `${window.location.origin}/api`) ||
+  'http://localhost:5000/api'
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: API_BASE,
   timeout: 10000,
   withCredentials: true,
   headers: {
@@ -97,11 +102,7 @@ apiClient.interceptors.response.use(
       // User token expired - try to refresh
       console.log('User token expired, attempting refresh')
       try {
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        )
+        const response = await apiClient.post('/auth/refresh', {}, { withCredentials: true })
         
         const { accessToken } = response.data
         
