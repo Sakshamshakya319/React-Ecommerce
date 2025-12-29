@@ -4,9 +4,20 @@ const bcrypt = require('bcryptjs')
 const admin = require('firebase-admin')
 const User = require('../models/User')
 const Seller = require('../models/Seller')
-// const unifiedEmailService = require('../services/unifiedEmailService') // Temporarily disabled
+// const unifiedEmailService = require('../services/unifiedEmailService') // Disabled to prevent timeout
 
 const router = express.Router()
+
+// Simple test route for unified auth
+router.get('/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Unified auth routes working (email service disabled)',
+    timestamp: new Date().toISOString()
+  })
+})
+
+module.exports = router
 
 // @route   POST /api/unified-auth/forgot-password
 // @desc    Smart forgot password - detects user type automatically

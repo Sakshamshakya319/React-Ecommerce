@@ -40,9 +40,46 @@ const mockSellers = [
   }
 ]
 
-// Helper function to generate mock JWT token
+// Helper function to generate proper mock JWT token
 const generateMockToken = (userId, role = 'user') => {
-  return `mock-jwt-token-${role}-${userId}-${Date.now()}`
+  // Create a proper JWT-like structure (base64 encoded)
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64')
+  const payload = Buffer.from(JSON.stringify({ 
+    userId, 
+    role, 
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + (15 * 60) // 15 minutes
+  })).toString('base64')
+  const signature = Buffer.from(`mock-signature-${userId}-${Date.now()}`).toString('base64')
+  
+  return `${header}.${payload}.${signature}`
+}
+
+// Helper function to decode mock JWT token
+const decodeMockToken = (token) => {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString())
+    return payload
+  } catch (error) {
+    return null
+  }
+}
+
+// Helper function to find user by token
+const findUserByToken = (token) => {
+  const decoded = decodeMockToken(token)
+  if (!decoded) return null
+  
+  if (decoded.role === 'admin') {
+    return mockAdmins.find(a => a._id === decoded.userId)
+  } else if (decoded.role === 'seller') {
+    return mockSellers.find(s => s._id === decoded.userId)
+  } else {
+    return mockUsers.find(u => u._id === decoded.userId)
+  }
 }
 
 // Test endpoint
@@ -54,8 +91,10 @@ router.get('/test', (req, res) => {
       'POST /api/auth/register',
       'POST /api/auth/login',
       'POST /api/auth/google-login',
-      'POST /api/auth/admin-login',
-      'POST /api/auth/seller-login'
+      'POST /api/auth/refresh',
+      'GET /api/auth/validate-token',
+      'GET /api/auth/me',
+      'POST /api/auth/logout'
     ]
   })
 })
@@ -210,93 +249,91 @@ router.post('/google-login', (req, res) => {
   }
 })
 
-// Admin Login
-router.post('/admin-login', (req, res) => {
+// Token Refresh
+router.post('/refresh', (req, res) => {
   try {
-    const { email, password } = req.body
-
-    if (!email || !password) {
-      return res.status(400).json({
+    const authHeader = req.headers.authorization
+    let token = null
+    
+    // Try to get token from Authorization header or cookies
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7)
+    } else if (req.cookies && req.cookies.refreshToken) {
+      token = req.cookies.refreshToken
+    }
+    
+    if (!token) {
+      return res.status(401).json({
         success: false,
-        message: 'Email and password are required'
+        message: 'Refresh token not found'
       })
     }
 
-    // Find admin
-    const admin = mockAdmins.find(a => a.email === email && a.password === password)
-    if (!admin) {
-      return res.status(400).json({
+    const user = findUserByToken(token)
+    if (!user) {
+      return res.status(401).json({
         success: false,
-        message: 'Invalid admin credentials'
+        message: 'Invalid refresh token'
       })
     }
 
-    const token = generateMockToken(admin._id, 'admin')
+    // Generate new token
+    const newToken = generateMockToken(user._id, user.role || 'user')
 
-    // Return admin without password
-    const { password: _, ...adminWithoutPassword } = admin
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user
 
     res.json({
       success: true,
-      message: 'Admin login successful',
-      admin: adminWithoutPassword,
-      token
+      accessToken: newToken,
+      user: userWithoutPassword
     })
 
   } catch (error) {
-    console.error('Admin login error:', error)
+    console.error('Token refresh error:', error)
     res.status(500).json({
       success: false,
-      message: 'Admin login failed'
+      message: 'Token refresh failed'
     })
   }
 })
 
-// Seller Login
-router.post('/seller-login', (req, res) => {
+// Validate Token
+router.get('/validate-token', (req, res) => {
   try {
-    const { email, password } = req.body
-
-    if (!email || !password) {
-      return res.status(400).json({
+    const authHeader = req.headers.authorization
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
         success: false,
-        message: 'Email and password are required'
+        message: 'Access token required'
       })
     }
 
-    // Find seller
-    const seller = mockSellers.find(s => s.email === email && s.password === password)
-    if (!seller) {
-      return res.status(400).json({
+    const token = authHeader.substring(7)
+    const user = findUserByToken(token)
+    
+    if (!user) {
+      return res.status(401).json({
         success: false,
-        message: 'Invalid seller credentials'
+        message: 'Invalid token'
       })
     }
 
-    if (seller.status !== 'approved') {
-      return res.status(403).json({
-        success: false,
-        message: 'Seller account is not approved yet'
-      })
-    }
-
-    const token = generateMockToken(seller._id, 'seller')
-
-    // Return seller without password
-    const { password: _, ...sellerWithoutPassword } = seller
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user
 
     res.json({
       success: true,
-      message: 'Seller login successful',
-      seller: sellerWithoutPassword,
-      token
+      message: 'Token is valid',
+      user: userWithoutPassword
     })
 
   } catch (error) {
-    console.error('Seller login error:', error)
-    res.status(500).json({
+    console.error('Token validation error:', error)
+    res.status(401).json({
       success: false,
-      message: 'Seller login failed'
+      message: 'Invalid token'
     })
   }
 })
@@ -314,30 +351,28 @@ router.get('/me', (req, res) => {
     }
 
     const token = authHeader.substring(7)
+    const user = findUserByToken(token)
     
-    // Mock token validation - extract user info from token
-    if (token.includes('user-')) {
-      const userId = token.split('-')[3]
-      const user = mockUsers.find(u => u._id.includes(userId))
-      if (user) {
-        const { password: _, ...userWithoutPassword } = user
-        return res.json({
-          success: true,
-          user: userWithoutPassword
-        })
-      }
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token'
+      })
     }
 
-    res.status(401).json({
-      success: false,
-      message: 'Invalid token'
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user
+
+    res.json({
+      success: true,
+      user: userWithoutPassword
     })
 
   } catch (error) {
-    console.error('Token validation error:', error)
-    res.status(401).json({
+    console.error('Get user error:', error)
+    res.status(500).json({
       success: false,
-      message: 'Invalid token'
+      message: 'Failed to get user information'
     })
   }
 })
@@ -348,6 +383,54 @@ router.post('/logout', (req, res) => {
     success: true,
     message: 'Logout successful'
   })
+})
+
+// Change Password
+router.put('/change-password', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access token required'
+      })
+    }
+
+    const token = authHeader.substring(7)
+    const user = findUserByToken(token)
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token'
+      })
+    }
+
+    const { newPassword } = req.body
+    
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
+      })
+    }
+
+    // Update password (in mock database)
+    user.password = newPassword
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully'
+    })
+
+  } catch (error) {
+    console.error('Change password error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update password'
+    })
+  }
 })
 
 module.exports = router
