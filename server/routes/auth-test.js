@@ -10,21 +10,38 @@ router.get('/test', (req, res) => {
   })
 })
 
-// Google login test route that doesn't use Firebase
+// Google login test route that matches frontend expectations
 router.post('/google-login', (req, res) => {
   try {
     console.log('Google login attempt:', req.body)
     
-    // For now, return a mock response
+    const { idToken, firebaseUser } = req.body
+    
+    if (!idToken || !firebaseUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required data'
+      })
+    }
+    
+    // Return the exact structure the frontend expects
     res.json({
       success: true,
-      message: 'Google login endpoint working (test mode)',
+      message: 'Google login successful',
       user: {
-        id: 'test-user-id',
-        email: 'test@example.com',
-        displayName: 'Test User'
+        _id: 'test-user-id-123',
+        customerId: 'CUST-TEST-001',
+        email: firebaseUser.email || 'test@example.com',
+        displayName: firebaseUser.displayName || 'Test User',
+        photoURL: firebaseUser.photoURL || '',
+        phoneNumber: firebaseUser.phoneNumber || '',
+        isEmailVerified: true,
+        role: 'user',
+        provider: 'google',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       },
-      token: 'test-jwt-token'
+      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-jwt-token-for-development'
     })
   } catch (error) {
     console.error('Google login error:', error)
