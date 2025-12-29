@@ -14,9 +14,6 @@ import { getReviewCount, getProductRating, cleanProductData } from '../utils/dat
 import toast from 'react-hot-toast'
 import { handleImageError } from '../utils/imageUtils'
 
-// Import home image properly for Vite
-import homeImage from '/home.png'
-
 const Home = () => {
   const { products, fetchProducts, isLoading } = useProductStore()
   const { addToCart } = useCartStore()
@@ -165,7 +162,7 @@ const Home = () => {
             >
               <div className="relative">
                 <img
-                  src={homeImage}
+                  src="/home.png"
                   alt="Shopping Experience"
                   className="w-full h-auto max-w-lg mx-auto rounded-2xl shadow-2xl"
                   onError={(e) => handleImageError(e, '/placeholder-product.svg')}

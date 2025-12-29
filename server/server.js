@@ -36,29 +36,13 @@ const app = express()
 // Trust proxy for rate limiting
 app.set('trust proxy', 1)
 
-// CORS configuration
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'https://react-ecommerce-qn3a.onrender.com',
-  process.env.CLIENT_URL
-].filter(Boolean)
-
+// CORS configuration - Temporary permissive setup for debugging
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true)
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      console.log('Blocked by CORS:', origin)
-      callback(new Error('Not allowed by CORS'))
-    }
-  },
+  origin: true, // Allow all origins temporarily for debugging
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 }))
 
 // Rate limiting
