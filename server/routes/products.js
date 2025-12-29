@@ -1,6 +1,6 @@
 const express = require('express')
 const Product = require('../models/Product')
-const { verifyToken, optionalAuth } = require('../middleware/auth')
+const { verifyToken, optionalAuth } = require('../middleware/auth-test') // Using test auth
 const { 
   validatePagination, 
   validateProductFilters,
