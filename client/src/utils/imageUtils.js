@@ -22,6 +22,14 @@ export const getReliableImageUrl = (imageUrl, fallback = '/placeholder-product.s
   return imageUrl
 }
 
+// Alias for backward compatibility
+export const getImageUrl = getReliableImageUrl
+
+// Another alias for fallback functionality
+export const getFallbackImageUrl = (imageUrl, fallback = '/placeholder-product.svg') => {
+  return getReliableImageUrl(imageUrl, fallback)
+}
+
 /**
  * Handle image load error with fallback
  * @param {Event} event - The error event
@@ -40,6 +48,9 @@ export const handleImageError = (event, fallback = '/placeholder-product.svg') =
   // Try fallback image
   img.src = fallback
 }
+
+// Alias for backward compatibility
+export const createImageErrorHandler = (fallback) => (event) => handleImageError(event, fallback)
 
 /**
  * Preload an image to check if it exists

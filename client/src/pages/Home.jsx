@@ -12,7 +12,6 @@ import Price from '../components/ui/Price'
 import { getImageUrl, createImageErrorHandler } from '../utils/imageUtils'
 import { getReviewCount, getProductRating, cleanProductData } from '../utils/dataUtils'
 import toast from 'react-hot-toast'
-import { handleImageError } from '../utils/imageUtils'
 
 const Home = () => {
   const { products, fetchProducts, isLoading } = useProductStore()
@@ -165,7 +164,7 @@ const Home = () => {
                   src="/home.png"
                   alt="Shopping Experience"
                   className="w-full h-auto max-w-lg mx-auto rounded-2xl shadow-2xl"
-                  onError={(e) => handleImageError(e, '/placeholder-product.svg')}
+                  onError={createImageErrorHandler('/placeholder-product.svg')}
                   onLoad={() => {
                     console.log('Home image loaded successfully')
                   }}
