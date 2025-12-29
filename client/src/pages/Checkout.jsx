@@ -496,7 +496,6 @@ const Checkout = () => {
               <div className="text-center text-xs text-gray-500 mb-4">
                 🔒 Your payment information is secure and encrypted
               </div>
-              </div>
             </div>
           </div>
         </div>
