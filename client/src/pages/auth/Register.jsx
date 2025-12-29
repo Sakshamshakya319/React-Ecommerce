@@ -93,9 +93,6 @@ const Register = () => {
       }
     }
   }
-      console.error('Google login error:', error)
-    }
-  }
 
   if (isLoading) {
     return (
