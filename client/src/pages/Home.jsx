@@ -9,6 +9,7 @@ import { useLanguageStore } from '../store/languageStore'
 import Button from '../components/ui/Button'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import Price from '../components/ui/Price'
+import { getImageUrl, createImageErrorHandler } from '../utils/imageUtils'
 import { getReviewCount, getProductRating, cleanProductData } from '../utils/dataUtils'
 import toast from 'react-hot-toast'
 
