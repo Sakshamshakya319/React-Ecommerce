@@ -11,7 +11,7 @@ const path = require('path')
 require('dotenv').config()
 
 // Import routes
-const authRoutes = require('./routes/auth')
+const authRoutes = require('./routes/auth-test') // Using test version
 const userRoutes = require('./routes/users')
 const productRoutes = require('./routes/products')
 const cartRoutes = require('./routes/cart')
