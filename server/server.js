@@ -28,6 +28,9 @@ const unifiedAuthRoutes = require('./routes/unifiedAuth')
 const { errorHandler } = require('./middleware/errorHandler')
 const { notFound } = require('./middleware/notFound')
 
+// Import test auth middleware for development
+const testAuthMiddleware = require('./middleware/auth-test')
+
 // Initialize Firebase Admin
 require('./config/firebase')
 
