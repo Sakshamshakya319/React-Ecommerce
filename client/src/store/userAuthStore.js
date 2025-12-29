@@ -18,14 +18,29 @@ export const useUserAuthStore = create(
       setUserToken: (token) => set({ userToken: token }),
       
       userLogin: (user, token) => {
+        console.log('userLogin called with:', { user, token })
+        
+        // Clear any existing auth state first
+        localStorage.removeItem(STORAGE_KEYS.USER_TOKEN)
+        localStorage.removeItem(STORAGE_KEYS.USER_DATA)
+        
+        // Set new auth state
         set({ 
           user, 
           userToken: token, 
           isUserAuthenticated: true,
           isLoading: false
         })
+        
+        // Save to localStorage
         localStorage.setItem(STORAGE_KEYS.USER_TOKEN, token)
         localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user))
+        
+        console.log('userLogin completed, new state:', {
+          user,
+          token,
+          isAuthenticated: true
+        })
       },
       
       userLogout: () => {

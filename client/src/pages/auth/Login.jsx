@@ -112,17 +112,38 @@ const Login = () => {
       
       // Check if we got the expected response
       if (!response.data.user || !response.data.token) {
+        console.error('Invalid response structure:', response.data)
         throw new Error('Invalid response from server: missing user or token')
       }
+      
+      console.log('About to call userLogin with:', {
+        user: response.data.user,
+        token: response.data.token
+      })
       
       // Use the user auth store to save the user and token
       userLogin(response.data.user, response.data.token)
       
-      // Initialize cart after successful login
-      await initializeCartAfterLogin()
+      console.log('userLogin called, checking auth state...')
       
-      toast.success('Google login successful!')
-      navigate(from, { replace: true })
+      // Force a small delay to ensure state updates
+      setTimeout(() => {
+        console.log('Auth state after login:', {
+          isUserAuthenticated: useUserAuthStore.getState().isUserAuthenticated,
+          user: useUserAuthStore.getState().user
+        })
+        
+        if (useUserAuthStore.getState().isUserAuthenticated) {
+          // Initialize cart after successful login
+          initializeCartAfterLogin()
+          
+          toast.success('Google login successful!')
+          navigate(from, { replace: true })
+        } else {
+          console.error('Auth state not updated properly')
+          toast.error('Login failed - please try again')
+        }
+      }, 100)
       
     } catch (error) {
       console.error('Google login error:', error)
