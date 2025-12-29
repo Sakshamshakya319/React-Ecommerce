@@ -62,8 +62,12 @@ const Login = () => {
       
       console.log('User login response:', response.data)
       
-      if (response.data.success && response.data.token && response.data.user) {
-        userLogin(response.data.user, response.data.token)
+      const payload = response.data
+      const token = payload.token || payload.accessToken
+      const user = payload.user
+      
+      if (payload.success && token && user) {
+        userLogin(user, token)
         
         // Initialize cart after successful login
         await initializeCartAfterLogin()
