@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const admin = require('firebase-admin')
 const User = require('../models/User')
 const Seller = require('../models/Seller')
-const unifiedEmailService = require('../services/unifiedEmailService')
+// const unifiedEmailService = require('../services/unifiedEmailService') // Temporarily disabled
 
 const router = express.Router()
 
