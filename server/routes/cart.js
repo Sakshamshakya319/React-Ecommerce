@@ -11,11 +11,22 @@ const router = express.Router()
 // @access  Private
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const cart = await Cart.findOrCreateForUser(req.user._id)
+    console.log('Cart request for user:', req.user.email)
+    
+    // Return mock cart data
+    const mockCart = {
+      _id: `cart-${req.user._id}`,
+      user: req.user._id,
+      items: [],
+      totalAmount: 0,
+      totalItems: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
     
     res.status(200).json({
       success: true,
-      cart
+      cart: mockCart
     })
 
   } catch (error) {

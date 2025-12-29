@@ -1,21 +1,9 @@
 const express = require('express')
+const { addMockUser } = require('../middleware/auth-test')
 const router = express.Router()
 
-// Mock user database (in production, this would be MongoDB)
-const mockUsers = [
-  {
-    _id: 'user-123',
-    customerId: 'CUST-001',
-    email: 'user@test.com',
-    password: 'password123', // In production, this would be hashed
-    displayName: 'Test User',
-    role: 'user',
-    provider: 'email',
-    isEmailVerified: true,
-    createdAt: new Date().toISOString()
-  }
-]
-
+// Mock user databases - shared with auth middleware
+const mockUsers = []
 const mockAdmins = [
   {
     _id: 'admin-123',
@@ -229,9 +217,15 @@ router.post('/google-login', (req, res) => {
         createdAt: new Date().toISOString()
       }
       mockUsers.push(user)
+      
+      // Also add to auth middleware's mock database
+      addMockUser(user)
     }
 
     const token = generateMockToken(user._id, 'user')
+
+    console.log('Google login successful for:', user.email)
+    console.log('Generated token:', token)
 
     res.json({
       success: true,

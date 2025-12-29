@@ -13,17 +13,8 @@ const decodeMockToken = (token) => {
   }
 }
 
-// Mock user databases
-const mockUsers = [
-  {
-    _id: 'user-123',
-    customerId: 'CUST-001',
-    email: 'user@test.com',
-    displayName: 'Test User',
-    role: 'user'
-  }
-]
-
+// Mock user databases - these will be updated when users login
+const mockUsers = []
 const mockAdmins = [
   {
     _id: 'admin-123',
@@ -32,7 +23,6 @@ const mockAdmins = [
     role: 'admin'
   }
 ]
-
 const mockSellers = [
   {
     _id: 'seller-123',
@@ -42,6 +32,18 @@ const mockSellers = [
     status: 'approved'
   }
 ]
+
+// Function to add user to mock database (called from auth routes)
+const addMockUser = (user) => {
+  const existingIndex = mockUsers.findIndex(u => u._id === user._id || u.email === user.email)
+  if (existingIndex >= 0) {
+    mockUsers[existingIndex] = user
+  } else {
+    mockUsers.push(user)
+  }
+  console.log('Mock user added/updated:', user.email)
+  console.log('Total mock users:', mockUsers.length)
+}
 
 // Verify JWT token (test version)
 const verifyToken = async (req, res, next) => {
@@ -155,5 +157,6 @@ module.exports = {
   verifyToken,
   optionalAuth,
   authRateLimit,
-  requireAdmin
+  requireAdmin,
+  addMockUser
 }
