@@ -2,6 +2,7 @@ const express = require('express')
 const Product = require('../models/Product')
 const Order = require('../models/Order')
 const User = require('../models/User')
+const Admin = require('../models/Admin')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { sendSellerApprovalEmail, sendSellerRejectionEmail } = require('../utils/emailService')
@@ -16,6 +17,26 @@ const {
 
 const router = express.Router()
 
+// Generate JWT tokens
+const generateTokens = (adminId) => {
+  const accessToken = jwt.sign(
+    { 
+      userId: adminId, 
+      role: 'admin'
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRE || '15m' }
+  )
+  
+  const refreshToken = jwt.sign(
+    { userId: adminId },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d' }
+  )
+  
+  return { accessToken, refreshToken }
+}
+
 // Admin Login Route (No authentication required)
 // @route   POST /api/admin/login
 // @desc    Admin login
@@ -24,30 +45,64 @@ router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body
     
-    // Check credentials (you can modify this to use database)
-    const adminCredentials = {
-      username: 'sakshamshakya94',
-      password: 'nrt*gam1apt0AZX-gdx'
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username and password are required'
+      })
     }
     
-    if (username !== adminCredentials.username || password !== adminCredentials.password) {
-      return res.status(401).json({
+    // Find admin by username or email
+    const admin = await Admin.findOne({
+      $or: [
+        { username: username },
+        { email: username }
+      ],
+      isActive: true
+    }).select('+password')
+    
+    if (!admin) {
+      return res.status(400).json({
         success: false,
         message: 'Invalid credentials'
       })
     }
     
-    // Create JWT token for admin
-    const token = jwt.sign(
-      { 
-        userId: 'admin', 
-        role: 'admin',
-        username: username
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    )
+    // Check password
+    const isPasswordValid = await admin.comparePassword(password)
     
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid credentials'
+      })
+    }
+    
+    // Generate tokens
+    const { accessToken, refreshToken } = generateTokens(admin._id)
+    
+    // Update refresh token and last login
+    admin.refreshToken = refreshToken
+    await admin.updateLastLogin()
+    
+    res.status(200).json({
+      success: true,
+      message: 'Admin login successful',
+      data: {
+        admin: admin.toSafeObject(),
+        accessToken,
+        refreshToken
+      }
+    })
+    
+  } catch (error) {
+    console.error('Admin login error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Server error during login'
+    })
+  }
+})
     res.status(200).json({
       success: true,
       message: 'Login successful',

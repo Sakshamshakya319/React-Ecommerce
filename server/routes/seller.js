@@ -259,10 +259,11 @@ router.post('/login', async (req, res) => {
       })
     }
     
-    // Create JWT token
+    // Create JWT token with proper structure
     const token = jwt.sign(
       { 
-        sellerId: seller._id,
+        userId: seller._id,  // Use userId instead of sellerId for consistency
+        sellerId: seller._id, // Keep sellerId for backward compatibility
         role: 'seller',
         businessName: seller.businessName
       },

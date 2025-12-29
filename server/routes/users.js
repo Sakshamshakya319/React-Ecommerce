@@ -1,6 +1,6 @@
 const express = require('express')
 const User = require('../models/User')
-const { verifyToken, requireAdmin } = require('../middleware/auth-test') // Using test auth
+const { verifyToken, requireAdmin } = require('../middleware/auth') // Using production auth
 const { validateUserUpdate, validateObjectId, validatePagination } = require('../middleware/validation')
 
 const router = express.Router()

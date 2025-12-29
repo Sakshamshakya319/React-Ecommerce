@@ -1,7 +1,7 @@
 const express = require('express')
 const Cart = require('../models/Cart')
 const Product = require('../models/Product')
-const { verifyToken } = require('../middleware/auth-test') // Using test auth
+const { verifyToken } = require('../middleware/auth') // Using production auth
 const { validateCartItem, validateObjectId } = require('../middleware/validation')
 
 const router = express.Router()

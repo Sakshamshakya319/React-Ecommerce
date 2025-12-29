@@ -11,13 +11,13 @@ const path = require('path')
 require('dotenv').config()
 
 // Import routes
-const authRoutes = require('./routes/auth-test') // Using test version
+const authRoutes = require('./routes/auth') // Using production version
 const userRoutes = require('./routes/users')
 const productRoutes = require('./routes/products')
 const cartRoutes = require('./routes/cart')
 const orderRoutes = require('./routes/orders')
-const adminRoutes = require('./routes/admin-test') // Using test version
-const sellerRoutes = require('./routes/seller-test') // Using test version
+const adminRoutes = require('./routes/admin') // Using production version
+const sellerRoutes = require('./routes/seller') // Using production version
 const uploadRoutes = require('./routes/upload')
 const reviewRoutes = require('./routes/reviews')
 const simpleReviewRoutes = require('./routes/simple-reviews')
@@ -28,9 +28,6 @@ const unifiedAuthRoutes = require('./routes/unifiedAuth')
 const { errorHandler } = require('./middleware/errorHandler')
 const { notFound } = require('./middleware/notFound')
 
-// Import test auth middleware for development
-const testAuthMiddleware = require('./middleware/auth-test')
-
 // Initialize Firebase Admin
 require('./config/firebase')
 
@@ -39,9 +36,26 @@ const app = express()
 // Trust proxy for rate limiting
 app.set('trust proxy', 1)
 
-// CORS configuration - Temporary fix for deployment
+// CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://react-ecommerce-qn3a.onrender.com',
+  process.env.CLIENT_URL
+].filter(Boolean)
+
 app.use(cors({
-  origin: true, // Allow all origins temporarily
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true)
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      console.log('Blocked by CORS:', origin)
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
