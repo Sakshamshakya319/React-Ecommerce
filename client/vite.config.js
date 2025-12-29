@@ -23,6 +23,10 @@ export default defineConfig({
           firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore']
         }
       }
-    }
-  }
+    },
+    assetsDir: 'assets',
+    copyPublicDir: true
+  },
+  publicDir: 'public',
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg', '**/*.webp']
 })

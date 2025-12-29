@@ -278,7 +278,7 @@ const ReviewsManagement = () => {
                   {/* Product Image */}
                   <div className="flex-shrink-0">
                     <img
-                      src={getImageUrl(review.productImage) || '/placeholder-product.png'}
+                      src={getImageUrl(review.productImage) || '/placeholder-product.svg'}
                       alt={review.productName}
                       className="w-16 h-16 object-cover rounded-lg"
                     />

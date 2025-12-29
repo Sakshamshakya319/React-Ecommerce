@@ -103,24 +103,6 @@ router.post('/login', async (req, res) => {
     })
   }
 })
-    res.status(200).json({
-      success: true,
-      message: 'Login successful',
-      token,
-      admin: {
-        username,
-        role: 'admin'
-      }
-    })
-    
-  } catch (error) {
-    console.error('Admin login error:', error)
-    res.status(500).json({
-      success: false,
-      message: 'Login failed'
-    })
-  }
-})
 
 // Admin authentication middleware
 const verifyAdminToken = async (req, res, next) => {

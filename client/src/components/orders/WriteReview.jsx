@@ -182,7 +182,7 @@ const WriteReview = ({ orderId, onClose, onSuccess }) => {
                   >
                     <div className="flex items-center space-x-3">
                       <img
-                        src={item.product.images?.[0]?.url || '/placeholder-product.png'}
+                        src={item.product.images?.[0]?.url || '/placeholder-product.svg'}
                         alt={item.product.name}
                         className="w-16 h-16 object-cover rounded"
                       />
@@ -207,7 +207,7 @@ const WriteReview = ({ orderId, onClose, onSuccess }) => {
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center space-x-3">
                 <img
-                  src={selectedProduct.product.images?.[0]?.url || '/placeholder-product.png'}
+                  src={selectedProduct.product.images?.[0]?.url || '/placeholder-product.svg'}
                   alt={selectedProduct.product.name}
                   className="w-16 h-16 object-cover rounded"
                 />

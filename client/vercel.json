@@ -17,6 +17,12 @@
       }
     },
     {
+      "src": "/(.*\\.(png|jpg|jpeg|gif|svg|ico|webp))",
+      "headers": {
+        "cache-control": "max-age=86400"
+      }
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }

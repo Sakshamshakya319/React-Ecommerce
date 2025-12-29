@@ -12,8 +12,10 @@ import Price from '../components/ui/Price'
 import { getImageUrl, createImageErrorHandler } from '../utils/imageUtils'
 import { getReviewCount, getProductRating, cleanProductData } from '../utils/dataUtils'
 import toast from 'react-hot-toast'
-// Home image from public folder
-const homeImageSrc = '/home.png'
+import { handleImageError } from '../utils/imageUtils'
+
+// Import home image properly for Vite
+import homeImage from '/home.png'
 
 const Home = () => {
   const { products, fetchProducts, isLoading } = useProductStore()
@@ -163,21 +165,12 @@ const Home = () => {
             >
               <div className="relative">
                 <img
-                  src={homeImageSrc}
+                  src={homeImage}
                   alt="Shopping Experience"
                   className="w-full h-auto max-w-lg mx-auto rounded-2xl shadow-2xl"
-                  onError={(e) => {
-                    console.error('Failed to load home image from:', homeImageSrc)
-                    // Try alternative path
-                    if (e.target.src.includes('/home.png')) {
-                      e.target.src = './home.png'
-                    } else {
-                      // Fallback to placeholder
-                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5YTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='
-                    }
-                  }}
+                  onError={(e) => handleImageError(e, '/placeholder-product.svg')}
                   onLoad={() => {
-                    console.log('Home image loaded successfully from:', homeImageSrc)
+                    console.log('Home image loaded successfully')
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-600/20 to-transparent rounded-2xl"></div>
