@@ -29,6 +29,7 @@ import AddProduct from './AddProduct'
 import ReviewsManagement from '../../components/admin/ReviewsManagement'
 import { getImageUrl, createImageErrorHandler } from '../../utils/imageUtils'
 import toast from 'react-hot-toast'
+import { STORAGE_KEYS } from '../../store/authTypes'
 
 // Admin Auth Check Hook
 const useAdminAuth = () => {
@@ -52,6 +53,7 @@ const ProductManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const { adminToken } = useAdminAuthStore()
 
   useEffect(() => {
     fetchProducts()
@@ -59,7 +61,11 @@ const ProductManagement = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await apiClient.get('/admin/products')
+      const response = await apiClient.get('/admin/products', {
+        headers: {
+          Authorization: `Bearer ${adminToken || localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) || ''}`
+        }
+      })
       setProducts(response.data.products || [])
     } catch (error) {
       console.error('Failed to fetch products:', error)
@@ -71,7 +77,11 @@ const ProductManagement = () => {
 
   const handleDeleteProduct = async (productId) => {
     try {
-      await apiClient.delete(`/admin/products/${productId}`)
+      await apiClient.delete(`/admin/products/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${adminToken || localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) || ''}`
+        }
+      })
       setProducts(products.filter(p => p._id !== productId))
       toast.success('Product deleted successfully')
       setDeleteConfirm(null)
@@ -99,7 +109,11 @@ const ProductManagement = () => {
     }
 
     try {
-      const response = await apiClient.put(`/admin/products/${editingProduct._id}`, updatedData)
+      const response = await apiClient.put(`/admin/products/${editingProduct._id}`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${adminToken || localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) || ''}`
+        }
+      })
       
       // Update the products list with the updated product
       setProducts(products.map(p => 
@@ -118,6 +132,10 @@ const ProductManagement = () => {
     try {
       await apiClient.put(`/admin/products/${productId}`, { 
         status: currentStatus === 'active' ? 'inactive' : 'active' 
+      }, {
+        headers: {
+          Authorization: `Bearer ${adminToken || localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) || ''}`
+        }
       })
       setProducts(products.map(p => 
         p._id === productId 
@@ -656,6 +674,7 @@ const OrderManagement = () => {
 const CustomersManagement = () => {
   const [customers, setCustomers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const { adminToken } = useAdminAuthStore()
 
   useEffect(() => {
     fetchCustomers()
@@ -663,7 +682,11 @@ const CustomersManagement = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await apiClient.get('/admin/customers')
+      const response = await apiClient.get('/admin/customers', {
+        headers: {
+          Authorization: `Bearer ${adminToken || localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) || ''}`
+        }
+      })
       setCustomers(response.data.customers || [])
     } catch (error) {
       console.error('Failed to fetch customers:', error)
@@ -677,6 +700,10 @@ const CustomersManagement = () => {
     try {
       await apiClient.put(`/admin/customers/${customerId}`, {
         status: currentStatus === 'active' ? 'blocked' : 'active'
+      }, {
+        headers: {
+          Authorization: `Bearer ${adminToken || localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) || ''}`
+        }
       })
       setCustomers(customers.map(c => 
         c._id === customerId 
@@ -802,6 +829,7 @@ const SellerManagement = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(null)
   const [rejectReason, setRejectReason] = useState('')
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const { adminToken } = useAdminAuthStore()
 
   useEffect(() => {
     fetchSellers()
@@ -809,7 +837,11 @@ const SellerManagement = () => {
 
   const fetchSellers = async () => {
     try {
-      const response = await apiClient.get('/admin/sellers')
+      const response = await apiClient.get('/admin/sellers', {
+        headers: {
+          Authorization: `Bearer ${adminToken || localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) || ''}`
+        }
+      })
       setSellers(response.data.sellers || [])
     } catch (error) {
       console.error('Failed to fetch sellers:', error)
@@ -821,7 +853,11 @@ const SellerManagement = () => {
 
   const handleApproveSeller = async (sellerId) => {
     try {
-      const response = await apiClient.put(`/admin/sellers/${sellerId}/approve`)
+      const response = await apiClient.put(`/admin/sellers/${sellerId}/approve`, {}, {
+        headers: {
+          Authorization: `Bearer ${adminToken || localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) || ''}`
+        }
+      })
       setSellers(sellers.map(s => 
         s._id === sellerId ? { ...s, status: 'approved' } : s
       ))
@@ -842,6 +878,10 @@ const SellerManagement = () => {
     try {
       await apiClient.put(`/admin/sellers/${sellerId}/reject`, {
         reason: rejectReason
+      }, {
+        headers: {
+          Authorization: `Bearer ${adminToken || localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) || ''}`
+        }
       })
       setSellers(sellers.map(s => 
         s._id === sellerId ? { ...s, status: 'rejected' } : s
@@ -1541,7 +1581,7 @@ const DashboardOverview = ({ stats }) => {
 const AdminDashboard = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const { admin, adminLogout } = useAdminAuthStore()
+  const { admin, adminLogout, adminToken } = useAdminAuthStore()
   const [stats, setStats] = useState(null)
   const [dashboardLoading, setDashboardLoading] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -1556,7 +1596,11 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await apiClient.get('/admin/stats')
+      const response = await apiClient.get('/admin/stats', {
+        headers: {
+          Authorization: `Bearer ${adminToken || localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) || ''}`
+        }
+      })
       setStats(response.data.stats || {})
     } catch (error) {
       console.error('Failed to fetch stats:', error)
