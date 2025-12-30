@@ -57,6 +57,7 @@ export const useSellerAuthStore = create(
       
       initializeSellerAuth: () => {
         console.log('Initializing seller auth...')
+        set({ isLoading: true })
         
         try {
           const sellerToken = localStorage.getItem(STORAGE_KEYS.SELLER_TOKEN)
@@ -78,7 +79,8 @@ export const useSellerAuthStore = create(
                 set({ 
                   seller, 
                   sellerToken, 
-                  isSellerAuthenticated: true 
+                  isSellerAuthenticated: true,
+                  isLoading: false 
                 })
                 console.log('Seller authentication restored successfully')
               } else {
@@ -94,7 +96,8 @@ export const useSellerAuthStore = create(
             set({ 
               seller: null,
               sellerToken: null,
-              isSellerAuthenticated: false 
+              isSellerAuthenticated: false,
+              isLoading: false 
             })
           }
         } catch (error) {
@@ -102,7 +105,8 @@ export const useSellerAuthStore = create(
           set({ 
             seller: null,
             sellerToken: null,
-            isSellerAuthenticated: false 
+            isSellerAuthenticated: false,
+            isLoading: false 
           })
         }
       },

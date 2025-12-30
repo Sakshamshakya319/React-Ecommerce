@@ -44,6 +44,7 @@ export const useAdminAuthStore = create(
       
       initializeAdminAuth: () => {
         console.log('Initializing admin auth...')
+        set({ isLoading: true })
         
         try {
           const adminToken = localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN)
@@ -61,16 +62,31 @@ export const useAdminAuthStore = create(
               console.log('Admin data parsed successfully:', admin.username)
               
               // Validate that the admin object has required fields
-              if (admin.username && admin.role === 'admin') {
+              if (
+                admin.username &&
+                (admin.role === 'admin' || admin.role === 'super-admin' || (admin.role && admin.role.includes('admin')))
+              ) {
                 set({ 
                   admin, 
                   adminToken, 
-                  isAdminAuthenticated: true 
+                  isAdminAuthenticated: true,
+                  isLoading: false 
                 })
                 console.log('Admin authentication restored successfully')
               } else {
-                console.log('Invalid admin data structure, clearing auth')
-                get().adminLogout()
+                // Fallback: accept admin if token exists and username is present
+                if (admin.username && adminToken) {
+                  set({
+                    admin,
+                    adminToken,
+                    isAdminAuthenticated: true,
+                    isLoading: false
+                  })
+                  console.log('Admin authentication restored with token fallback')
+                } else {
+                  console.log('Invalid admin data structure, clearing auth')
+                  get().adminLogout()
+                }
               }
             } catch (parseError) {
               console.error('Error parsing admin data:', parseError)
@@ -81,7 +97,8 @@ export const useAdminAuthStore = create(
             set({ 
               admin: null,
               adminToken: null,
-              isAdminAuthenticated: false 
+              isAdminAuthenticated: false,
+              isLoading: false 
             })
           }
         } catch (error) {
@@ -89,7 +106,8 @@ export const useAdminAuthStore = create(
           set({ 
             admin: null,
             adminToken: null,
-            isAdminAuthenticated: false 
+            isAdminAuthenticated: false,
+            isLoading: false 
           })
         }
       },

@@ -61,7 +61,15 @@ const UserProtectedRoute = ({ children }) => {
 
 // Protected Route Component for Admins
 const AdminProtectedRoute = ({ children }) => {
-  const { isAdminAuthenticated } = useAdminAuthStore()
+  const { isAdminAuthenticated, isLoading } = useAdminAuthStore()
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="large" />
+      </div>
+    )
+  }
   
   if (!isAdminAuthenticated) {
     return <Navigate to="/admin/login" replace />
@@ -72,7 +80,15 @@ const AdminProtectedRoute = ({ children }) => {
 
 // Protected Route Component for Sellers
 const SellerProtectedRoute = ({ children }) => {
-  const { isSellerAuthenticated } = useSellerAuthStore()
+  const { isSellerAuthenticated, isLoading } = useSellerAuthStore()
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="large" />
+      </div>
+    )
+  }
   
   if (!isSellerAuthenticated) {
     return <Navigate to="/seller/login" replace />

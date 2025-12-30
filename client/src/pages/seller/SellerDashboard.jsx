@@ -36,14 +36,14 @@ import toast from 'react-hot-toast'
 // Seller Auth Check Hook
 const useSellerAuth = () => {
   const navigate = useNavigate()
-  const { isSellerAuthenticated, initializeSellerAuth } = useSellerAuthStore()
+  const { isSellerAuthenticated, isLoading, initializeSellerAuth } = useSellerAuthStore()
   
   useEffect(() => {
     initializeSellerAuth()
-    if (!isSellerAuthenticated) {
+    if (!isLoading && !isSellerAuthenticated) {
       navigate('/seller/login')
     }
-  }, [navigate, isSellerAuthenticated, initializeSellerAuth])
+  }, [navigate, isSellerAuthenticated, isLoading, initializeSellerAuth])
   
   return isSellerAuthenticated
 }

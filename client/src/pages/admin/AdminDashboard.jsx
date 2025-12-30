@@ -34,14 +34,14 @@ import { STORAGE_KEYS } from '../../store/authTypes'
 // Admin Auth Check Hook
 const useAdminAuth = () => {
   const navigate = useNavigate()
-  const { isAdminAuthenticated, initializeAdminAuth } = useAdminAuthStore()
+  const { isAdminAuthenticated, isLoading, initializeAdminAuth } = useAdminAuthStore()
   
   useEffect(() => {
     initializeAdminAuth()
-    if (!isAdminAuthenticated) {
+    if (!isLoading && !isAdminAuthenticated) {
       navigate('/admin/login')
     }
-  }, [navigate, isAdminAuthenticated, initializeAdminAuth])
+  }, [navigate, isAdminAuthenticated, isLoading, initializeAdminAuth])
   
   return isAdminAuthenticated
 }
