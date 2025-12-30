@@ -1064,14 +1064,23 @@ router.put('/profile', verifyToken, async (req, res) => {
 })
 
 // Test endpoint to verify seller authentication
-router.get('/test-auth', (req, res) => {
+router.get('/test-auth', verifyToken, (req, res) => {
+  const seller = req.seller || req.user
+  
+  if (!seller) {
+    return res.status(401).json({
+      success: false,
+      message: 'Seller authentication required'
+    })
+  }
+  
   res.json({
     success: true,
     message: 'Seller authentication working',
     seller: {
-      id: req.seller._id,
-      businessName: req.seller.businessName,
-      status: req.seller.status
+      id: seller._id,
+      businessName: seller.businessName,
+      status: seller.status
     }
   })
 })
