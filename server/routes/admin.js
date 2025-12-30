@@ -1082,9 +1082,9 @@ router.get('/emails', async (req, res) => {
 // @route   POST /api/admin/fix-image-urls
 // @desc    Fix image URLs in database (convert full URLs to relative paths)
 // @access  Private/Admin
-router.post('/fix-image-urls', verifyToken, async (req, res) => {
+router.post('/fix-image-urls', async (req, res) => {
   try {
-    console.log('Admin image URL fix requested by:', req.user._id)
+    console.log('Admin image URL fix requested by:', req.admin._id)
     
     // Import the fix function
     const { fixProductImageUrls } = require('../scripts/fixImageUrls')
