@@ -83,6 +83,17 @@ export const getPlaceholderImageUrl = (text = 'Product Image', width = 400, heig
 }
 
 /**
+ * Generate fallback image URL (alias for getPlaceholderImageUrl for backward compatibility)
+ * @param {string} text - Text to display in placeholder
+ * @param {number} width - Image width
+ * @param {number} height - Image height
+ * @returns {string} - Fallback image URL
+ */
+export const getFallbackImageUrl = (text = 'Product Image', width = 400, height = 400) => {
+  return getPlaceholderImageUrl(text, width, height)
+}
+
+/**
  * Create an error handler for image loading failures
  * @param {string} fallbackText - Text for placeholder
  * @returns {function} - Error handler function
@@ -176,6 +187,7 @@ export default {
   getApiBaseUrl,
   getImageUrl,
   getPlaceholderImageUrl,
+  getFallbackImageUrl,
   createImageErrorHandler,
   preloadImage,
   getOptimizedImageUrl,
