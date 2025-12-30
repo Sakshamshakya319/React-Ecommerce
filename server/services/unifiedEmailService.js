@@ -35,20 +35,34 @@ class UnifiedEmailService {
         },
         tls: {
           rejectUnauthorized: false
-        }
+        },
+        // Add timeouts to prevent hanging
+        connectionTimeout: 10000, // 10 seconds
+        greetingTimeout: 10000,
+        socketTimeout: 10000
       })
 
-      // Verify connection configuration
+      // Verify connection configuration non-blocking
+      this.verifyConnection()
+      
+    } catch (error) {
+      console.error('❌ Unified Email service configuration error:', error.message)
+    }
+  }
+
+  async verifyConnection() {
+    if (!this.transporter) return
+
+    try {
       await this.transporter.verify()
       console.log('✅ Unified Email service initialized successfully')
       console.log(`📧 Configured for: ${process.env.EMAIL_USER}`)
-      
     } catch (error) {
-      console.error('❌ Unified Email service initialization failed:', error.message)
+      console.warn('⚠️  Unified Email service connection warning:', error.message)
+      console.warn('   (Service will attempt to reconnect when sending emails)')
       
       if (error.message.includes('Invalid login')) {
         console.error('💡 Hint: Check EMAIL_USER and EMAIL_PASS in .env file')
-        console.error('💡 For Gmail: Use App Password, not regular password')
       }
     }
   }
