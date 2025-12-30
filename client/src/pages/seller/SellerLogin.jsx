@@ -52,6 +52,17 @@ const SellerLogin = () => {
         // Use seller auth store
         sellerLogin(response.data.seller, response.data.token)
         
+        // Validate token before redirecting to dashboard
+        try {
+          await apiClient.get('/seller/validate-token')
+          console.log('Seller token validated successfully')
+        } catch (validationError) {
+          console.error('Seller token validation failed:', validationError)
+          const { sellerLogout } = useSellerAuthStore.getState()
+          sellerLogout()
+          throw new Error(validationError.response?.data?.message || 'Session invalid. Please login again.')
+        }
+        
         // Verify storage
         setTimeout(() => {
           const storedToken = localStorage.getItem('sellerToken')
@@ -68,7 +79,13 @@ const SellerLogin = () => {
     } catch (error) {
       console.error('Seller login error:', error)
       const errorMessage = error.response?.data?.message || error.message || 'Login failed. Please try again.'
-      toast.error(errorMessage)
+      if (errorMessage.includes('pending') || errorMessage.includes('not approved')) {
+        toast.error('Your seller account is not approved yet. Please wait for approval.')
+      } else if (errorMessage.includes('Invalid credentials')) {
+        toast.error('Invalid email or password. If you were just approved, use the password from the approval email or reset it.')
+      } else {
+        toast.error(errorMessage)
+      }
     } finally {
       setIsLoading(false)
     }
