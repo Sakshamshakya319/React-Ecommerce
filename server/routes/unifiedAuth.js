@@ -78,9 +78,17 @@ router.post('/forgot-password', async (req, res) => {
       { expiresIn: '1h' }
     )
     
-    // Create reset URL based on user type
+    // Create reset URL based on user type, preferring request origin in deployment
     const resetPath = recipient.type === 'seller' ? '/seller/reset-password' : '/reset-password'
-    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}${resetPath}?token=${resetToken}`
+    const originHeader = req.get('origin')
+    const forwardedProto = req.headers['x-forwarded-proto']
+    const forwardedHost = req.headers['x-forwarded-host']
+    const host = req.get('host')
+    const proto = forwardedProto || req.protocol
+    const hostForComputed = forwardedHost || host
+    const computedBase = proto && hostForComputed ? `${proto}://${hostForComputed}` : null
+    const clientBaseUrl = originHeader || process.env.CLIENT_URL || computedBase || 'http://localhost:3000'
+    const resetUrl = `${clientBaseUrl}${resetPath}?token=${resetToken}`
     
     try {
       // Send password reset email using unified service
