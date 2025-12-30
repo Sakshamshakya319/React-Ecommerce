@@ -1079,4 +1079,32 @@ router.get('/emails', async (req, res) => {
   }
 })
 
+// @route   POST /api/admin/fix-image-urls
+// @desc    Fix image URLs in database (convert full URLs to relative paths)
+// @access  Private/Admin
+router.post('/fix-image-urls', verifyToken, async (req, res) => {
+  try {
+    console.log('Admin image URL fix requested by:', req.user._id)
+    
+    // Import the fix function
+    const { fixProductImageUrls } = require('../scripts/fixImageUrls')
+    
+    // Run the fix
+    await fixProductImageUrls()
+    
+    res.status(200).json({
+      success: true,
+      message: 'Image URLs have been fixed successfully'
+    })
+    
+  } catch (error) {
+    console.error('Fix image URLs error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fix image URLs',
+      error: error.message
+    })
+  }
+})
+
 module.exports = router

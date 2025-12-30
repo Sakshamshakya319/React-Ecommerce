@@ -122,13 +122,47 @@ app.get('/', (req, res) => {
   })
 })
 
-// Simple test endpoint to verify server is working
+// Test endpoint to verify server is working
 app.get('/test', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Server test endpoint working',
     timestamp: new Date().toISOString()
   })
+})
+
+// Test endpoint for image serving
+app.get('/test-images', async (req, res) => {
+  try {
+    const fs = require('fs')
+    const uploadsPath = path.join(__dirname, 'uploads', 'products')
+    
+    // Check if uploads directory exists
+    const uploadsExists = fs.existsSync(uploadsPath)
+    
+    // Get list of files if directory exists
+    let files = []
+    if (uploadsExists) {
+      files = fs.readdirSync(uploadsPath).slice(0, 5) // First 5 files
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Image serving test',
+      uploadsDirectory: {
+        exists: uploadsExists,
+        path: uploadsPath,
+        sampleFiles: files
+      },
+      testUrls: files.map(file => `${req.protocol}://${req.get('host')}/uploads/products/${file}`)
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Image test failed',
+      error: error.message
+    })
+  }
 })
 
 // Health check endpoint
@@ -174,6 +208,20 @@ app.get('/api/placeholder/:type', (req, res) => {
   res.setHeader('Cache-Control', 'public, max-age=86400') // Cache for 1 day
   res.send(svg)
 })
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads')
+const productsDir = path.join(uploadsDir, 'products')
+
+if (!require('fs').existsSync(uploadsDir)) {
+  require('fs').mkdirSync(uploadsDir, { recursive: true })
+  console.log('Created uploads directory')
+}
+
+if (!require('fs').existsSync(productsDir)) {
+  require('fs').mkdirSync(productsDir, { recursive: true })
+  console.log('Created products directory')
+}
 
 // Serve static files (uploaded images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
