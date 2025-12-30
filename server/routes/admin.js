@@ -143,6 +143,17 @@ const verifyAdminToken = async (req, res, next) => {
   }
 }
 
+// @route   GET /api/admin/validate-token
+// @desc    Validate admin token
+// @access  Private/Admin
+router.get('/validate-token', verifyAdminToken, (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Token is valid',
+    admin: req.user
+  })
+})
+
 // All other routes require admin authentication
 router.use(verifyAdminToken)
 

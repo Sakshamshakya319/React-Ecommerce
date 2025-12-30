@@ -290,6 +290,17 @@ router.post('/login', async (req, res) => {
   }
 })
 
+// @route   GET /api/seller/validate-token
+// @desc    Validate seller token
+// @access  Private/Seller
+router.get('/validate-token', verifyToken, (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Token is valid',
+    seller: req.user
+  })
+})
+
 // Firebase Login
 // @route   POST /api/seller/firebase-login
 // @desc    Seller Firebase login

@@ -20,8 +20,14 @@ const verifyToken = async (req, res, next) => {
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     
-    // Find user by ID
-    const user = await User.findById(decoded.userId).select('-refreshToken')
+    let user = null
+    
+    // Check user based on role
+    if (decoded.role === 'seller') {
+      user = await Seller.findById(decoded.userId).select('-password')
+    } else {
+      user = await User.findById(decoded.userId).select('-refreshToken')
+    }
     
     if (!user) {
       return res.status(401).json({

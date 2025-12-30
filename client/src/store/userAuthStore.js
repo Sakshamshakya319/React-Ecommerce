@@ -23,6 +23,11 @@ export const useUserAuthStore = create(
         // Clear any existing auth state first
         localStorage.removeItem(STORAGE_KEYS.USER_TOKEN)
         localStorage.removeItem(STORAGE_KEYS.USER_DATA)
+        // Also clear admin and seller tokens to prevent conflicts
+        localStorage.removeItem(STORAGE_KEYS.ADMIN_TOKEN)
+        localStorage.removeItem(STORAGE_KEYS.ADMIN_DATA)
+        localStorage.removeItem(STORAGE_KEYS.SELLER_TOKEN)
+        localStorage.removeItem(STORAGE_KEYS.SELLER_DATA)
         
         // Set new auth state
         set({ 

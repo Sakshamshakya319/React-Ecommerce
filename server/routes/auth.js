@@ -554,8 +554,19 @@ router.get('/validate-token', verifyToken, async (req, res) => {
   }
 })
 
+// @route   GET /api/auth/validate-token
+// @desc    Validate user token
+// @access  Private
+router.get('/validate-token', verifyToken, (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Token is valid',
+    user: req.user.toSafeObject()
+  })
+})
+
 // @route   GET /api/auth/me
-// @desc    Get current user
+// @desc    Get current logged in user
 // @access  Private
 router.get('/me', verifyToken, async (req, res) => {
   try {
