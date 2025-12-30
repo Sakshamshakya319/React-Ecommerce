@@ -1311,18 +1311,9 @@ router.put('/orders/:orderId/status', verifyToken, async (req, res) => {
       order.shippingInfo.deliveredAt = new Date()
     }
     
-    // Update order status
+    // Update order status using the model method (this handles status history automatically)
     const updateNote = note || `Status updated to ${status} by seller: ${req.seller.businessName}`
     await order.updateStatus(status, updateNote, sellerId)
-    
-    // Add status history entry specifically for seller update
-    order.statusHistory.push({
-      status: status,
-      timestamp: new Date(),
-      note: updateNote,
-      updatedBy: sellerId,
-      updatedByType: 'seller'
-    })
     
     await order.save()
     

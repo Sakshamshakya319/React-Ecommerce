@@ -175,6 +175,49 @@ const OrderDetail = () => {
     return ['pending', 'confirmed'].includes(status)
   }
 
+  // Consolidate status history to remove duplicates and show only meaningful changes
+  const getConsolidatedStatusHistory = (statusHistory) => {
+    if (!statusHistory || statusHistory.length === 0) return []
+    
+    const consolidated = []
+    const seenStatuses = new Set()
+    
+    // Sort by timestamp (newest first for display)
+    const sortedHistory = [...statusHistory].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    
+    for (const entry of sortedHistory) {
+      // Only add if we haven't seen this status before (removes duplicates)
+      if (!seenStatuses.has(entry.status)) {
+        seenStatuses.add(entry.status)
+        
+        // Add shipping info if available for shipped status
+        const consolidatedEntry = { ...entry }
+        if (entry.status === 'shipped' && order.shippingInfo) {
+          consolidatedEntry.shippingInfo = order.shippingInfo
+        }
+        
+        consolidated.push(consolidatedEntry)
+      }
+    }
+    
+    // Return in chronological order (oldest first)
+    return consolidated.reverse()
+  }
+
+  // Get user-friendly status display names
+  const getStatusDisplayName = (status) => {
+    const displayNames = {
+      pending: 'Order Placed',
+      confirmed: 'Order Confirmed',
+      processing: 'Preparing for Shipment',
+      shipped: 'Shipped',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled',
+      refunded: 'Refunded'
+    }
+    return displayNames[status] || status.charAt(0).toUpperCase() + status.slice(1)
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -299,18 +342,24 @@ const OrderDetail = () => {
                 <h2 className="text-lg font-semibold text-gray-900 mb-6">Order Status History</h2>
                 
                 <div className="space-y-4">
-                  {order.statusHistory.map((status, index) => (
+                  {getConsolidatedStatusHistory(order.statusHistory).map((status, index) => (
                     <div key={index} className="flex items-center space-x-4">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getStatusColor(status.status)}`}>
                         {getStatusIcon(status.status)}
                       </div>
                       <div className="flex-1">
-                        <div className="font-medium capitalize">{status.status}</div>
+                        <div className="font-medium capitalize">{getStatusDisplayName(status.status)}</div>
                         <div className="text-sm text-gray-600">
                           {new Date(status.timestamp).toLocaleString()}
                         </div>
-                        {status.note && (
+                        {status.note && !status.note.includes('Status updated to') && (
                           <div className="text-sm text-gray-500 mt-1">{status.note}</div>
+                        )}
+                        {status.shippingInfo && (
+                          <div className="text-sm text-blue-600 mt-1">
+                            {status.shippingInfo.carrier && `Carrier: ${status.shippingInfo.carrier}`}
+                            {status.shippingInfo.trackingNumber && ` • Tracking: ${status.shippingInfo.trackingNumber}`}
+                          </div>
                         )}
                       </div>
                     </div>
