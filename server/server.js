@@ -36,13 +36,17 @@ const app = express()
 // Trust proxy for rate limiting
 app.set('trust proxy', 1)
 
-// CORS configuration - Temporary permissive setup for debugging
+// CORS configuration - Production ready
 app.use(cors({
-  origin: true, // Allow all origins temporarily for debugging
+  origin: [
+    'https://react-ecommerce-one-phi.vercel.app',
+    'http://localhost:3000', // For development
+    'http://localhost:5173'  // For Vite dev server
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200
 }))
 
 // Rate limiting

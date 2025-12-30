@@ -680,7 +680,7 @@ const verifySellerToken = async (req, res, next) => {
     }
     
     // Find seller
-    const seller = await Seller.findById(decoded.sellerId)
+    const seller = await Seller.findById(decoded.userId || decoded.sellerId)
     console.log('Seller found:', seller ? seller.businessName : 'Not found')
     
     if (!seller || seller.status !== 'approved') {
