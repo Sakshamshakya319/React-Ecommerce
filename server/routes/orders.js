@@ -536,14 +536,21 @@ router.get('/:id/pdf-invoice', verifyToken, validateObjectId('id'), async (req, 
 
     console.log('Order found:', order.orderNumber)
 
-    // Check if user owns this order
-    if (order.user._id.toString() !== req.user._id.toString()) {
-      console.log('ERROR: User does not own this order')
+    // Check if user owns this order OR is a seller with products in this order
+    const isCustomer = order.user._id.toString() === req.user._id.toString()
+    const isSeller = order.items.some(item => 
+      item.seller && item.seller._id.toString() === req.user._id.toString()
+    )
+    
+    if (!isCustomer && !isSeller) {
+      console.log('ERROR: User does not own this order and is not a seller for any items')
       return res.status(403).json({
         success: false,
-        message: 'Access denied. You can only download invoices for your own orders.'
+        message: 'Access denied. You can only download invoices for your own orders or orders containing your products.'
       })
     }
+    
+    console.log('Access granted:', isCustomer ? 'Customer' : 'Seller')
 
     // Allow invoice download for confirmed, processing, shipped, and delivered orders
     const allowedStatuses = ['confirmed', 'processing', 'shipped', 'delivered']
