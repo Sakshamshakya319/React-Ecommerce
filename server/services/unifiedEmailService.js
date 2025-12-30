@@ -147,6 +147,8 @@ class UnifiedEmailService {
         subject: options.subject,
         type: options.emailType || 'general',
         status: 'sent',
+        html: options.html,
+        text: options.text,
         messageId: result.messageId,
         recipientType: options.recipientType
       })
@@ -162,6 +164,8 @@ class UnifiedEmailService {
         subject: options.subject,
         type: options.emailType || 'general',
         status: 'failed',
+        html: options.html,
+        text: options.text,
         error: error.message,
         recipientType: options.recipientType
       })
@@ -174,16 +178,19 @@ class UnifiedEmailService {
   async logEmail(logData) {
     try {
       const emailLog = new EmailLog({
-        recipient: logData.to,
-        subject: logData.subject,
-        type: logData.type,
-        status: logData.status,
+        to: logData.to,
+        from: process.env.EMAIL_USER || 'no-reply@localhost',
+        subject: logData.subject || '',
+        body: logData.html || logData.text || '',
+        emailType: logData.type || 'general',
+        status: logData.status || 'pending',
+        provider: 'nodemailer',
         messageId: logData.messageId,
-        error: logData.error,
-        recipientType: logData.recipientType,
-        sentAt: new Date()
+        errorMessage: logData.error,
+        sentAt: logData.status === 'sent' ? new Date() : undefined,
+        failedAt: logData.status === 'failed' ? new Date() : undefined,
+        metadata: { recipientType: logData.recipientType }
       })
-      
       await emailLog.save()
     } catch (error) {
       console.error('Failed to log email:', error.message)

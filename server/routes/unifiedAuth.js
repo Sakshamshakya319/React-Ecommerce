@@ -92,9 +92,8 @@ router.post('/forgot-password', async (req, res) => {
         success: true,
         message: 'Password reset email sent successfully. Please check your inbox.',
         recipientType: recipient.type,
-        // Remove this in production - only for development/testing
+        resetUrl,
         ...(process.env.NODE_ENV === 'development' && { 
-          resetUrl,
           debug: {
             email: recipient.data.email,
             name: recipient.name,
@@ -111,10 +110,9 @@ router.post('/forgot-password', async (req, res) => {
       res.status(200).json({
         success: true,
         message: 'If an account with this email exists, you will receive a password reset email shortly.',
-        // In development, show the actual error
+        resetUrl,
         ...(process.env.NODE_ENV === 'development' && {
-          emailError: emailError.message,
-          resetUrl // Provide URL for testing even if email fails
+          emailError: emailError.message
         })
       })
     }
