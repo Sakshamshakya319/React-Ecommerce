@@ -878,10 +878,18 @@ router.use(verifySellerToken)
 // @route   PUT /api/seller/change-password
 // @desc    Change seller password
 // @access  Private/Seller
-router.put('/change-password', async (req, res) => {
+router.put('/change-password', verifyToken, async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body
-    const sellerId = req.seller._id
+    // Get seller ID from the authenticated user
+    const sellerId = req.seller?._id || req.user?._id
+    
+    if (!sellerId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Seller authentication required'
+      })
+    }
     
     // Validate input
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -960,9 +968,19 @@ router.put('/change-password', async (req, res) => {
 // @route   GET /api/seller/profile
 // @desc    Get seller profile information
 // @access  Private/Seller
-router.get('/profile', async (req, res) => {
+router.get('/profile', verifyToken, async (req, res) => {
   try {
-    const seller = await Seller.findById(req.seller._id)
+    // Get seller ID from the authenticated user
+    const sellerId = req.seller?._id || req.user?._id
+    
+    if (!sellerId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Seller authentication required'
+      })
+    }
+    
+    const seller = await Seller.findById(sellerId)
     
     if (!seller) {
       return res.status(404).json({
@@ -992,9 +1010,18 @@ router.get('/profile', async (req, res) => {
 // @route   PUT /api/seller/profile
 // @desc    Update seller profile information
 // @access  Private/Seller
-router.put('/profile', async (req, res) => {
+router.put('/profile', verifyToken, async (req, res) => {
   try {
-    const sellerId = req.seller._id
+    // Get seller ID from the authenticated user
+    const sellerId = req.seller?._id || req.user?._id
+    
+    if (!sellerId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Seller authentication required'
+      })
+    }
+    
     const updateData = req.body
     
     // Remove sensitive fields that shouldn't be updated via this route
@@ -1204,7 +1231,7 @@ router.get('/stats', verifyToken, async (req, res) => {
 // @route   PUT /api/seller/orders/:orderId/status
 // @desc    Update order status for seller's items
 // @access  Private/Seller
-router.put('/orders/:orderId/status', async (req, res) => {
+router.put('/orders/:orderId/status', verifyToken, async (req, res) => {
   try {
     const { orderId } = req.params
     const { status, note, trackingNumber, carrier, estimatedDelivery } = req.body
@@ -1326,7 +1353,7 @@ router.put('/orders/:orderId/status', async (req, res) => {
 // @route   GET /api/seller/analytics
 // @desc    Get seller analytics data
 // @access  Private/Seller
-router.get('/analytics', async (req, res) => {
+router.get('/analytics', verifyToken, async (req, res) => {
   try {
     const { days = 30 } = req.query
     const sellerId = req.seller._id
@@ -1572,7 +1599,7 @@ router.get('/debug/orders', async (req, res) => {
 // @route   GET /api/seller/orders
 // @desc    Get seller orders (only orders containing seller's products)
 // @access  Private/Seller
-router.get('/orders', validatePagination, async (req, res) => {
+router.get('/orders', verifyToken, validatePagination, async (req, res) => {
   try {
     const {
       page = 1,
@@ -1676,7 +1703,7 @@ router.get('/orders', validatePagination, async (req, res) => {
 // @route   POST /api/seller/products
 // @desc    Create new product (seller)
 // @access  Private/Seller
-router.post('/products', async (req, res) => {
+router.post('/products', verifyToken, async (req, res) => {
   try {
     console.log('Seller product creation request:', {
       sellerId: req.seller._id,
@@ -1885,7 +1912,7 @@ router.post('/products', async (req, res) => {
 // @route   GET /api/seller/products
 // @desc    Get seller products
 // @access  Private/Seller
-router.get('/products', validatePagination, async (req, res) => {
+router.get('/products', verifyToken, validatePagination, async (req, res) => {
   try {
     const {
       page = 1,
@@ -1969,7 +1996,7 @@ router.get('/products', validatePagination, async (req, res) => {
 // @route   GET /api/seller/products/top
 // @desc    Get top selling products
 // @access  Private/Seller
-router.get('/products/top', async (req, res) => {
+router.get('/products/top', verifyToken, async (req, res) => {
   try {
     const { limit = 5 } = req.query
     const sellerId = req.seller._id
@@ -1999,7 +2026,7 @@ router.get('/products/top', async (req, res) => {
 // @route   PUT /api/seller/products/:id
 // @desc    Update product (seller)
 // @access  Private/Seller
-router.put('/products/:id', validateObjectId('id'), async (req, res) => {
+router.put('/products/:id', verifyToken, validateObjectId('id'), async (req, res) => {
   try {
     const productId = req.params.id
     const sellerId = req.seller._id
@@ -2162,7 +2189,7 @@ router.put('/products/:id', validateObjectId('id'), async (req, res) => {
 // @route   DELETE /api/seller/products/:id
 // @desc    Delete/deactivate product (seller)
 // @access  Private/Seller
-router.delete('/products/:id', validateObjectId('id'), async (req, res) => {
+router.delete('/products/:id', verifyToken, validateObjectId('id'), async (req, res) => {
   try {
     const productId = req.params.id
     const sellerId = req.seller._id
@@ -2221,7 +2248,7 @@ router.delete('/products/:id', validateObjectId('id'), async (req, res) => {
 // @route   GET /api/seller/products/:id
 // @desc    Get single product for editing (seller)
 // @access  Private/Seller
-router.get('/products/:id', validateObjectId('id'), async (req, res) => {
+router.get('/products/:id', verifyToken, validateObjectId('id'), async (req, res) => {
   try {
     const productId = req.params.id
     const sellerId = req.seller._id
