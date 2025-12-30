@@ -166,11 +166,7 @@ router.post('/register', upload.fields([
       })
     }
     
-    // Hash password before saving
-    if (processedData.password) {
-      const saltRounds = 12
-      processedData.password = await bcrypt.hash(processedData.password, saltRounds)
-    }
+    // Password will be hashed by Seller model pre-save hook
     
     // Create seller
     const seller = new Seller({

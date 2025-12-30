@@ -52,7 +52,6 @@ const SellerLogin = () => {
         // Use seller auth store
         sellerLogin(response.data.seller, response.data.token)
         
-        // Validate token before redirecting to dashboard
         try {
           await apiClient.get('/seller/validate-token')
           console.log('Seller token validated successfully')
