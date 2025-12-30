@@ -117,7 +117,7 @@ const sendSellerApprovalEmail = async (sellerEmail, sellerName, businessName, de
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
         <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #2563eb; margin: 0;">Store</h1>
+            <h1 style="color: #2563eb; margin: 0;">Shoporia</h1>
             <p style="color: #6b7280; margin: 5px 0;">Seller Portal</p>
           </div>
           
@@ -189,7 +189,7 @@ const sendSellerRejectionEmail = async (sellerEmail, sellerName, businessName, r
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
         <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #2563eb; margin: 0;">Store</h1>
+            <h1 style="color: #2563eb; margin: 0;">Shoporia</h1>
             <p style="color: #6b7280; margin: 5px 0;">Seller Portal</p>
           </div>
           

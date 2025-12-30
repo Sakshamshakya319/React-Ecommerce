@@ -13,13 +13,13 @@ const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">3D</span>
+                <span className="text-white font-bold text-lg">S</span>
               </div>
-              <span className="text-xl font-bold">Store</span>
+              <span className="text-xl font-bold">Shoporia</span>
             </div>
             <p className="text-gray-400 text-sm">
-              Experience products like never before with our revolutionary 3D viewing technology. 
-              Shop with confidence and see every detail before you buy.
+              Your modern e-commerce platform for seamless online shopping experience. 
+              Shop with confidence and discover amazing products at great prices.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
