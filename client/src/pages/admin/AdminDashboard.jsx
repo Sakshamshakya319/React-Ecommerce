@@ -1676,11 +1676,18 @@ const AdminDashboard = () => {
           <div className="flex flex-col h-full">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Admin Panel</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Welcome, {admin?.username}
-                </p>
+              <div className="flex items-center space-x-3">
+                <img 
+                  src="/shoporia.png" 
+                  alt="Shoporia Logo" 
+                  className="w-8 h-8 object-contain"
+                />
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Admin Panel</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Welcome, {admin?.username}
+                  </p>
+                </div>
               </div>
               {/* Close button for mobile */}
               <button

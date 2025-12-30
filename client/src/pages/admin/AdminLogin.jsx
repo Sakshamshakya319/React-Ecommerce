@@ -75,9 +75,13 @@ const AdminLogin = () => {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4"
+              className="flex justify-center mb-4"
             >
-              <Lock className="h-8 w-8 text-white" />
+              <img 
+                src="/shoporia.png" 
+                alt="Shoporia Logo" 
+                className="w-16 h-16 object-contain"
+              />
             </motion.div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Admin Login

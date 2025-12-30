@@ -291,9 +291,11 @@ const SellerRegister = () => {
           {/* Header */}
           <div className="text-center mb-12">
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-primary-600 dark:bg-primary-500 rounded-full flex items-center justify-center">
-                <Store className="h-8 w-8 text-white" />
-              </div>
+              <img 
+                src="/shoporia.png" 
+                alt="Shoporia Logo" 
+                className="w-16 h-16 object-contain"
+              />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Become a Seller

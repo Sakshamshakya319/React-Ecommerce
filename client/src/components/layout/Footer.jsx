@@ -11,10 +11,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/shoporia.png" 
+                alt="Shoporia Logo" 
+                className="w-8 h-8 object-contain"
+              />
               <span className="text-xl font-bold">Shoporia</span>
             </div>
             <p className="text-gray-400 text-sm">

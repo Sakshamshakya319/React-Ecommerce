@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Calendar, CreditCard, MapPin, Download, RefreshCw, Star } from 'lucide-react'
+import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Calendar, CreditCard, MapPin, Download, RefreshCw, Star, FileText } from 'lucide-react'
 import { apiClient } from '../api/client'
 import Button from '../components/ui/Button'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import Price from '../components/ui/Price'
 import WriteReview from '../components/orders/WriteReview'
+import OrderStatusTracker from '../components/order/OrderStatusTracker'
 import toast from 'react-hot-toast'
 
 const OrderDetail = () => {
@@ -94,6 +95,46 @@ const OrderDetail = () => {
         toast.error('Order not found')
       } else {
         toast.error('Failed to download invoice. Please try again.')
+      }
+    }
+  }
+
+  const handleDownloadPDFInvoice = async () => {
+    try {
+      console.log('Downloading PDF invoice for order:', id)
+      
+      const response = await apiClient.get(`/orders/${id}/pdf-invoice`, {
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/pdf'
+        }
+      })
+      
+      console.log('PDF Invoice response received:', response.status)
+      
+      // Create blob URL and download
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `invoice-${order.orderNumber || id}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('PDF Invoice downloaded successfully!')
+    } catch (error) {
+      console.error('Failed to download PDF invoice:', error)
+      
+      // Handle different error types
+      if (error.response?.status === 400) {
+        toast.error(error.response.data?.message || 'Invoice is not available for this order status')
+      } else if (error.response?.status === 403) {
+        toast.error('You do not have permission to download this invoice')
+      } else if (error.response?.status === 404) {
+        toast.error('Order not found')
+      } else {
+        toast.error('Failed to download PDF invoice. Please try again.')
       }
     }
   }
@@ -201,6 +242,9 @@ const OrderDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Order Status Tracker */}
+            <OrderStatusTracker order={order} />
+            
             {/* Order Items */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Order Items</h2>
@@ -356,14 +400,24 @@ const OrderDetail = () => {
               
               <div className="space-y-3">
                 {['confirmed', 'processing', 'shipped', 'delivered'].includes(order.status) && (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleDownloadInvoice}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Invoice
-                  </Button>
+                  <div className="space-y-2">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleDownloadPDFInvoice}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Download PDF Invoice
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full text-sm"
+                      onClick={handleDownloadInvoice}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Text Invoice
+                    </Button>
+                  </div>
                 )}
                 
                 {order.status === 'delivered' && (

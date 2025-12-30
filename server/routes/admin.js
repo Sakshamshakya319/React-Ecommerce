@@ -319,6 +319,13 @@ router.post('/products', async (req, res) => {
       })
     }
     
+    if (!productData.description || typeof productData.description !== 'string' || productData.description.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Product description is required and must be a non-empty string'
+      })
+    }
+    
     if (!productData.price || isNaN(parseFloat(productData.price))) {
       return res.status(400).json({
         success: false,
@@ -338,6 +345,7 @@ router.post('/products', async (req, res) => {
       productData.name = 'Untitled Product'
     }
     productData.name = productData.name.trim()
+    productData.description = productData.description.trim()
     productData.price = parseFloat(productData.price)
     productData.stock = parseInt(productData.stock) || 0
     productData.status = 'active' // Ensure product is active and visible
@@ -423,23 +431,36 @@ router.post('/products', async (req, res) => {
   } catch (error) {
     console.error('Create product error:', error)
     
+    // Enhanced error logging
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      validationErrors: error.errors
+    })
+    
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => ({
         field: err.path,
-        message: err.message
+        message: err.message,
+        value: err.value
       }))
+      
+      console.error('Validation errors:', validationErrors)
       
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: validationErrors
+        errors: validationErrors,
+        details: 'Please check all required fields are properly filled'
       })
     }
     
     if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0]
       return res.status(400).json({
         success: false,
-        message: 'Product with this SKU already exists'
+        message: `${field} already exists. Please use a different value.`
       })
     }
     

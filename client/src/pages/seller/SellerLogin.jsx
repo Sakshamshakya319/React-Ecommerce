@@ -136,9 +136,11 @@ const SellerLogin = () => {
         {/* Header */}
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-primary-600 dark:bg-primary-500 rounded-full flex items-center justify-center">
-              <Store className="h-8 w-8 text-white" />
-            </div>
+            <img 
+              src="/shoporia.png" 
+              alt="Shoporia Logo" 
+              className="w-16 h-16 object-contain"
+            />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             Seller Login

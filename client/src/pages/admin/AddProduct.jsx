@@ -244,9 +244,11 @@ const AddProduct = () => {
           {/* Header */}
           <div className="mb-6 lg:mb-8">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary-600 dark:bg-primary-500 rounded-lg flex items-center justify-center">
-                <Package className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
-              </div>
+              <img 
+                src="/shoporia.png" 
+                alt="Shoporia Logo" 
+                className="w-10 h-10 lg:w-12 lg:h-12 object-contain"
+              />
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Add New Product</h1>
                 <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">Create a new product listing for your store</p>

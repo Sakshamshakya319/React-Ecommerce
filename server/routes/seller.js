@@ -280,6 +280,58 @@ router.post('/debug/create-test-seller', async (req, res) => {
   }
 })
 
+// Debug route to test seller product creation
+router.post('/debug/test-product', async (req, res) => {
+  try {
+    console.log('=== DEBUG: Testing seller product creation ===')
+    console.log('Request body:', req.body)
+    console.log('Headers:', req.headers)
+    
+    // Test with minimal required data
+    const testProduct = {
+      name: 'Debug Test Product',
+      description: 'This is a test product created for debugging purposes',
+      price: 19.99,
+      category: 'Test Category',
+      stock: 5,
+      seller: '507f1f77bcf86cd799439011' // Dummy seller ID for testing
+    }
+    
+    console.log('Test product data:', testProduct)
+    
+    // Validate against Product model
+    const product = new Product(testProduct)
+    const validationError = product.validateSync()
+    
+    if (validationError) {
+      console.log('Validation errors:', validationError.errors)
+      return res.status(400).json({
+        success: false,
+        message: 'Validation test failed',
+        errors: Object.keys(validationError.errors).map(key => ({
+          field: key,
+          message: validationError.errors[key].message
+        }))
+      })
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Product validation test passed',
+      requiredFields: ['name', 'description', 'price', 'category'],
+      testData: testProduct
+    })
+    
+  } catch (error) {
+    console.error('Debug test error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Debug test failed',
+      error: error.message
+    })
+  }
+})
+
 // Debug route to check sellers in database
 router.get('/debug/list-sellers', async (req, res) => {
   try {
@@ -1614,6 +1666,13 @@ router.post('/products', async (req, res) => {
       })
     }
     
+    if (!productData.description || typeof productData.description !== 'string' || productData.description.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Product description is required and must be a non-empty string'
+      })
+    }
+    
     if (!productData.price || isNaN(parseFloat(productData.price))) {
       return res.status(400).json({
         success: false,
@@ -1630,6 +1689,7 @@ router.post('/products', async (req, res) => {
     
     // Clean and prepare data
     productData.name = productData.name.trim()
+    productData.description = productData.description.trim()
     productData.price = parseFloat(productData.price)
     productData.stock = parseInt(productData.stock) || 0
     productData.status = 'active' // Seller products are active by default
@@ -1735,16 +1795,36 @@ router.post('/products', async (req, res) => {
   } catch (error) {
     console.error('Create seller product error:', error)
     
+    // Enhanced error logging
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      validationErrors: error.errors
+    })
+    
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => ({
         field: err.path,
-        message: err.message
+        message: err.message,
+        value: err.value
       }))
+      
+      console.error('Validation errors:', validationErrors)
       
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: validationErrors
+        errors: validationErrors,
+        details: 'Please check all required fields are properly filled'
+      })
+    }
+    
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0]
+      return res.status(400).json({
+        success: false,
+        message: `${field} already exists. Please use a different value.`
       })
     }
     

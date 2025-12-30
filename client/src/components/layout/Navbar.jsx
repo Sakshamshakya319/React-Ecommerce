@@ -67,10 +67,12 @@ const Navbar = () => {
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary-600 dark:bg-primary-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
+          <Link to="/" className="flex items-center space-x-3">
+            <img 
+              src="/shoporia.png" 
+              alt="Shoporia Logo" 
+              className="w-8 h-8 object-contain"
+            />
             <span className="text-xl font-bold text-gray-900 dark:text-white">Shoporia</span>
           </Link>
 

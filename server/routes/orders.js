@@ -4,6 +4,7 @@ const Cart = require('../models/Cart')
 const Product = require('../models/Product')
 const { verifyToken } = require('../middleware/auth') // Using production auth
 const { validateOrder, validateObjectId, validatePagination } = require('../middleware/validation')
+const PDFInvoiceService = require('../services/pdfInvoiceService')
 
 const router = express.Router()
 
@@ -502,6 +503,87 @@ router.get('/:id/invoice', verifyToken, validateObjectId('id'), async (req, res)
     res.status(500).json({
       success: false,
       message: 'Failed to generate invoice',
+      error: process.env.NODE_ENV === 'development' ? {
+        message: error.message,
+        stack: error.stack
+      } : 'Internal server error'
+    })
+  }
+})
+
+// @route   GET /api/orders/:id/pdf-invoice
+// @desc    Generate and download PDF invoice for order
+// @access  Private
+router.get('/:id/pdf-invoice', verifyToken, validateObjectId('id'), async (req, res) => {
+  try {
+    console.log('=== PDF INVOICE REQUEST START ===')
+    console.log('Order ID:', req.params.id)
+    console.log('User ID:', req.user._id)
+
+    // Find the order and populate necessary fields
+    const order = await Order.findById(req.params.id)
+      .populate('user', 'displayName email customerId phoneNumber')
+      .populate('items.product', 'name images')
+      .populate('items.seller', 'businessName')
+
+    if (!order) {
+      console.log('ERROR: Order not found')
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      })
+    }
+
+    console.log('Order found:', order.orderNumber)
+
+    // Check if user owns this order
+    if (order.user._id.toString() !== req.user._id.toString()) {
+      console.log('ERROR: User does not own this order')
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You can only download invoices for your own orders.'
+      })
+    }
+
+    // Allow invoice download for confirmed, processing, shipped, and delivered orders
+    const allowedStatuses = ['confirmed', 'processing', 'shipped', 'delivered']
+    if (!allowedStatuses.includes(order.status)) {
+      console.log('ERROR: Invoice not available for status:', order.status)
+      return res.status(400).json({
+        success: false,
+        message: `Invoice is not available for orders with status: ${order.status}. Invoice is available for confirmed, processing, shipped, and delivered orders.`
+      })
+    }
+
+    console.log('Generating PDF invoice...')
+
+    // Generate PDF invoice
+    const pdfBuffer = await PDFInvoiceService.generateInvoice(order)
+
+    console.log('PDF generated successfully, size:', pdfBuffer.length, 'bytes')
+
+    // Set headers for PDF download
+    const filename = `invoice-${order.orderNumber}.pdf`
+    console.log('Setting headers for PDF file:', filename)
+
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+    res.setHeader('Content-Length', pdfBuffer.length)
+    res.setHeader('Cache-Control', 'no-cache')
+
+    console.log('Sending PDF response...')
+    console.log('=== PDF INVOICE REQUEST SUCCESS ===')
+    res.send(pdfBuffer)
+
+  } catch (error) {
+    console.log('=== PDF INVOICE REQUEST ERROR ===')
+    console.error('Generate PDF invoice error:', error)
+    console.error('Error stack:', error.stack)
+    console.log('=== END ERROR ===')
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate PDF invoice',
       error: process.env.NODE_ENV === 'development' ? {
         message: error.message,
         stack: error.stack
