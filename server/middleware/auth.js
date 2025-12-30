@@ -20,32 +20,41 @@ const verifyToken = async (req, res, next) => {
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     
-    let user = null
-    
-    // Check user based on role
+    // Handle seller vs user differently
     if (decoded.role === 'seller') {
-      user = await Seller.findById(decoded.userId).select('-password')
+      const seller = await Seller.findById(decoded.userId).select('-password')
+      if (!seller) {
+        return res.status(401).json({
+          success: false,
+          message: 'Seller not found'
+        })
+      }
+      if (seller.status !== 'approved') {
+        return res.status(401).json({
+          success: false,
+          message: 'Seller account is not approved'
+        })
+      }
+      req.seller = seller
+      req.user = seller
+      return next()
     } else {
-      user = await User.findById(decoded.userId).select('-refreshToken')
+      const user = await User.findById(decoded.userId).select('-refreshToken')
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not found'
+        })
+      }
+      if (!user.isActive) {
+        return res.status(401).json({
+          success: false,
+          message: 'Account is deactivated'
+        })
+      }
+      req.user = user
+      return next()
     }
-    
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'User not found'
-      })
-    }
-    
-    if (!user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is deactivated'
-      })
-    }
-    
-    // Add user to request object
-    req.user = user
-    next()
     
   } catch (error) {
     console.error('Token verification error:', error)

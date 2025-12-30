@@ -294,7 +294,7 @@ router.get('/validate-token', verifyToken, (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Token is valid',
-    seller: req.user
+    seller: req.seller || req.user
   })
 })
 
