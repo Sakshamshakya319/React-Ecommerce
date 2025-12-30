@@ -65,14 +65,15 @@ router.post('/register', authRateLimit, validateUserRegistration, async (req, re
       })
     }
     
-    // Create user in Firebase first
+    // Create user in Firebase first (without phone number to avoid E.164 issues)
     let firebaseUser
     try {
       firebaseUser = await admin.auth().createUser({
         email,
         password,
-        displayName,
-        phoneNumber
+        displayName
+        // Note: Skipping phoneNumber for Firebase to avoid E.164 format issues
+        // We'll store it in our database instead
       })
     } catch (firebaseError) {
       console.error('Firebase user creation error:', firebaseError)
