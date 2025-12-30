@@ -2,6 +2,7 @@ const express = require('express')
 const Order = require('../models/Order')
 const Cart = require('../models/Cart')
 const Product = require('../models/Product')
+const Seller = require('../models/Seller')
 const { verifyToken } = require('../middleware/auth') // Using production auth
 const { validateOrder, validateObjectId, validatePagination } = require('../middleware/validation')
 const PDFInvoiceService = require('../services/pdfInvoiceService')

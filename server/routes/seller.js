@@ -1109,9 +1109,17 @@ router.post('/test-email', async (req, res) => {
 // @route   GET /api/seller/stats
 // @desc    Get seller dashboard statistics
 // @access  Private/Seller
-router.get('/stats', async (req, res) => {
+router.get('/stats', verifyToken, async (req, res) => {
   try {
-    const sellerId = req.seller._id
+    // Get seller ID from the authenticated user
+    const sellerId = req.seller?._id || req.user?._id
+    
+    if (!sellerId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Seller authentication required'
+      })
+    }
     
     const [
       totalProducts,
