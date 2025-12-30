@@ -242,31 +242,24 @@ router.post('/reset-password', async (req, res) => {
     if (decoded.userType === 'seller') {
       user = await Seller.findById(decoded.userId)
       if (user) {
-        // Hash new password
-        const saltRounds = 12
-        const hashedPassword = await bcrypt.hash(password, saltRounds)
-        user.password = hashedPassword
+        user.password = password
         user.updatedAt = new Date()
         await user.save()
       }
     } else if (decoded.userType === 'user') {
       user = await User.findById(decoded.userId)
       if (user) {
-        // For users, we might need to handle Firebase password reset differently
         if (user.firebaseUid) {
           try {
-            // Update password in Firebase
             await admin.auth().updateUser(user.firebaseUid, {
               password: password
             })
           } catch (firebaseError) {
             console.error('Firebase password update error:', firebaseError)
-            // Continue with local password update as fallback
           }
         }
         
-        // Also update local password
-        user.password = password // User model has password hashing middleware
+        user.password = password
         await user.save()
       }
     }

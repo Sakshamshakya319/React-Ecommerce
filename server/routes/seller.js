@@ -227,9 +227,10 @@ router.post('/register', upload.fields([
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body
+    const normalizedEmail = String(email || '').trim().toLowerCase()
     
     // Find seller by email
-    const seller = await Seller.findOne({ email }).select('+password')
+    const seller = await Seller.findOne({ email: normalizedEmail }).select('+password')
     
     if (!seller) {
       return res.status(401).json({
@@ -614,12 +615,7 @@ router.post('/reset-password', async (req, res) => {
       })
     }
     
-    // Hash new password
-    const saltRounds = 12
-    const hashedPassword = await bcrypt.hash(password, saltRounds)
-    
-    // Update password
-    seller.password = hashedPassword
+    seller.password = password
     seller.updatedAt = new Date()
     await seller.save()
     
