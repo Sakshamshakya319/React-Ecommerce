@@ -1,7 +1,7 @@
 {
-  "name": "3d-ecommerce-app",
+  "name": "shoporia-app",
   "version": "1.0.0",
-  "description": "Professional 3D E-commerce Application",
+  "description": "Shoporia - Modern E-commerce Platform",
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
@@ -12,12 +12,12 @@
   },
   "keywords": [
     "react",
-    "threejs",
+    "shoporia",
     "ecommerce",
     "firebase",
     "mongodb"
   ],
-  "author": "Your Name",
+  "author": "Saksham Shakya",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"

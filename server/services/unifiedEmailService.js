@@ -379,7 +379,7 @@ class UnifiedEmailService {
     <body>
         <div class="email-container">
             <div class="header">
-                <div class="logo">${typeIcon} 3D E-commerce</div>
+                <div class="logo">${typeIcon} Shoporia</div>
                 <div class="recipient-badge">${recipientType.toUpperCase()}</div>
                 <div class="title">${title}</div>
             </div>

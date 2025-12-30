@@ -1,7 +1,7 @@
 {
-  "name": "3d-ecommerce-server",
+  "name": "shoporia-server",
   "version": "1.0.0",
-  "description": "Backend API for 3D E-commerce Application",
+  "description": "Backend API for Shoporia E-commerce Platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -16,6 +16,7 @@
     "mongodb",
     "jwt",
     "firebase",
+    "shoporia",
     "ecommerce"
   ],
   "author": "Your Name",

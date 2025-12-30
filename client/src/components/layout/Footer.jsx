@@ -94,7 +94,7 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4 text-primary-400" />
-                <span className="text-gray-400 text-sm">support@3dstore.com</span>
+                <span className="text-gray-400 text-sm">support@shoporia.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-4 w-4 text-primary-400" />
@@ -114,7 +114,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © {currentYear} 3D Store. All rights reserved.
+              © {currentYear} Shoporia. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link to="/terms" className="text-gray-400 hover:text-white transition-colors text-sm">

@@ -274,8 +274,8 @@ class EmailService {
             <div class="footer">
                 ${footerText || 'This email was sent from 3D E-commerce Platform. Please do not reply to this email.'}<br>
                 <br>
-                © ${new Date().getFullYear()} 3D E-commerce Platform. All rights reserved.<br>
-                <strong>Seller Support:</strong> seller-support@3decommerce.com
+                © ${new Date().getFullYear()} Shoporia Platform. All rights reserved.<br>
+                <strong>Seller Support:</strong> seller-support@shoporia.com
             </div>
         </div>
     </body>
@@ -302,9 +302,9 @@ ${additionalInfo ? `Important Information: ${additionalInfo}` : ''}
 Security Note: This link will expire in 1 hour for your security. 
 If you didn't request this password reset, please ignore this email.
 
-Need Help? Contact our support team at seller-support@3decommerce.com
+Need Help? Contact our support team at seller-support@shoporia.com
 
-© ${new Date().getFullYear()} 3D E-commerce Platform. All rights reserved.
+© ${new Date().getFullYear()} Shoporia Platform. All rights reserved.
     `.trim()
   }
 

@@ -1,8 +1,8 @@
-# 🛒 Modern E-commerce Platform
+# 🛒 Shoporia - Modern E-commerce Platform
 
-A full-stack e-commerce solution built with React, Node.js, and MongoDB, featuring advanced seller management, real-time pincode validation using India Post Office API, and comprehensive admin controls.
+Shoporia is a full-stack e-commerce solution built with React, Node.js, and MongoDB, featuring advanced seller management, real-time pincode validation using India Post Office API, and comprehensive admin controls.
 
-![E-commerce Platform](https://img.shields.io/badge/Platform-E--commerce-blue)
+![Shoporia Platform](https://img.shields.io/badge/Platform-Shoporia-blue)
 ![React](https://img.shields.io/badge/React-18.2.0-61dafb)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-green)
 ![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248)
@@ -68,8 +68,8 @@ A full-stack e-commerce solution built with React, Node.js, and MongoDB, featuri
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/ecommerce-platform.git
-   cd ecommerce-platform
+   git clone https://github.com/yourusername/shoporia.git
+   cd shoporia
    ```
 
 2. **Backend Setup**
@@ -336,6 +336,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ for the Indian e-commerce ecosystem**
+**Built with ❤️ by Shoporia Team**
 
 *Leveraging government APIs for accurate address validation and seamless user experience*

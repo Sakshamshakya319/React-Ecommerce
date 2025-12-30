@@ -71,7 +71,7 @@ const Navbar = () => {
             <div className="w-8 h-8 bg-primary-600 dark:bg-primary-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">S</span>
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">Store</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">Shoporia</span>
           </Link>
 
           {/* Desktop Navigation */}

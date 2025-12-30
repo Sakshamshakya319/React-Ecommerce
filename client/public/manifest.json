@@ -1,0 +1,16 @@
+{
+  "name": "Shoporia - Modern E-commerce Store",
+  "short_name": "Shoporia",
+  "description": "Your modern e-commerce platform for seamless online shopping experience",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "icons": [
+    {
+      "src": "/shoporia.ico",
+      "sizes": "16x16 32x32 48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
