@@ -131,7 +131,7 @@ app.get('/test', (req, res) => {
   })
 })
 
-// Test endpoint for image serving
+// Test endpoint for image serving (public access for debugging)
 app.get('/test-images', async (req, res) => {
   try {
     const fs = require('fs')
@@ -143,24 +143,37 @@ app.get('/test-images', async (req, res) => {
     // Get list of files if directory exists
     let files = []
     if (uploadsExists) {
-      files = fs.readdirSync(uploadsPath).slice(0, 5) // First 5 files
+      try {
+        files = fs.readdirSync(uploadsPath).slice(0, 5) // First 5 files
+      } catch (err) {
+        console.error('Error reading uploads directory:', err)
+      }
     }
     
     res.status(200).json({
       success: true,
       message: 'Image serving test',
+      timestamp: new Date().toISOString(),
+      server: {
+        environment: process.env.NODE_ENV || 'development',
+        host: req.get('host'),
+        protocol: req.protocol
+      },
       uploadsDirectory: {
         exists: uploadsExists,
         path: uploadsPath,
         sampleFiles: files
       },
-      testUrls: files.map(file => `${req.protocol}://${req.get('host')}/uploads/products/${file}`)
+      testUrls: files.map(file => `${req.protocol}://${req.get('host')}/uploads/products/${file}`),
+      placeholderUrl: `${req.protocol}://${req.get('host')}/api/upload/placeholder/product-image?text=Test%20Image`
     })
   } catch (error) {
+    console.error('Image test error:', error)
     res.status(500).json({
       success: false,
       message: 'Image test failed',
-      error: error.message
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     })
   }
 })
@@ -173,6 +186,41 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
   })
+})
+
+// Test specific image endpoint
+app.get('/test-image/:filename', (req, res) => {
+  try {
+    const fs = require('fs')
+    const { filename } = req.params
+    const imagePath = path.join(__dirname, 'uploads', 'products', filename)
+    
+    if (fs.existsSync(imagePath)) {
+      const stats = fs.statSync(imagePath)
+      res.status(200).json({
+        success: true,
+        message: 'Image found',
+        filename: filename,
+        path: imagePath,
+        size: stats.size,
+        url: `${req.protocol}://${req.get('host')}/uploads/products/${filename}`,
+        lastModified: stats.mtime
+      })
+    } else {
+      res.status(404).json({
+        success: false,
+        message: 'Image not found',
+        filename: filename,
+        path: imagePath
+      })
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error checking image',
+      error: error.message
+    })
+  }
 })
 
 // API routes

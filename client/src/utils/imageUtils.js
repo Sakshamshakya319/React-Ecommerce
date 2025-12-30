@@ -26,7 +26,7 @@ export const getApiBaseUrl = () => {
  */
 export const getImageUrl = (image, fallbackText = 'Product Image') => {
   if (!image) {
-    console.log('getImageUrl: No image provided, returning placeholder')
+    if (import.meta.env.DEV) console.log('getImageUrl: No image provided, returning placeholder')
     return getPlaceholderImageUrl(fallbackText)
   }
 
@@ -40,33 +40,33 @@ export const getImageUrl = (image, fallbackText = 'Product Image') => {
   }
 
   if (!imagePath) {
-    console.log('getImageUrl: No image path found, returning placeholder')
+    if (import.meta.env.DEV) console.log('getImageUrl: No image path found, returning placeholder')
     return getPlaceholderImageUrl(fallbackText)
   }
 
   // If it's already a full URL (starts with http), return as is
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    console.log('getImageUrl: Full URL detected:', imagePath)
+    if (import.meta.env.DEV) console.log('getImageUrl: Full URL detected:', imagePath)
     return imagePath
   }
 
   // If it's a relative path starting with /uploads, construct full URL
   if (imagePath.startsWith('/uploads/')) {
     const fullUrl = `${getApiBaseUrl()}${imagePath}`
-    console.log('getImageUrl: Relative path converted:', imagePath, '->', fullUrl)
+    if (import.meta.env.DEV) console.log('getImageUrl: Relative path converted:', imagePath, '->', fullUrl)
     return fullUrl
   }
 
   // If it's just a filename or relative path, assume it's in uploads/products
   if (!imagePath.startsWith('/')) {
     const fullUrl = `${getApiBaseUrl()}/uploads/products/${imagePath}`
-    console.log('getImageUrl: Filename converted:', imagePath, '->', fullUrl)
+    if (import.meta.env.DEV) console.log('getImageUrl: Filename converted:', imagePath, '->', fullUrl)
     return fullUrl
   }
 
   // Default case - prepend base URL
   const fullUrl = `${getApiBaseUrl()}${imagePath}`
-  console.log('getImageUrl: Default case:', imagePath, '->', fullUrl)
+  if (import.meta.env.DEV) console.log('getImageUrl: Default case:', imagePath, '->', fullUrl)
   return fullUrl
 }
 
