@@ -1199,10 +1199,10 @@ router.get('/stats', async (req, res) => {
 router.put('/orders/:orderId/status', async (req, res) => {
   try {
     const { orderId } = req.params
-    const { status, note } = req.body
+    const { status, note, trackingNumber, carrier, estimatedDelivery } = req.body
     const sellerId = req.seller._id
     
-    console.log('Updating order status:', { orderId, status, sellerId })
+    console.log('Updating order status:', { orderId, status, sellerId, trackingNumber })
     
     // Validate status
     const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
@@ -1238,6 +1238,35 @@ router.put('/orders/:orderId/status', async (req, res) => {
       })
     }
     
+    // Update shipping info if provided (for shipped status)
+    if (status === 'shipped' && (trackingNumber || carrier)) {
+      if (!order.shippingInfo) {
+        order.shippingInfo = {}
+      }
+      
+      if (trackingNumber) {
+        order.shippingInfo.trackingNumber = trackingNumber
+      }
+      
+      if (carrier) {
+        order.shippingInfo.carrier = carrier
+      }
+      
+      if (estimatedDelivery) {
+        order.shippingInfo.estimatedDelivery = new Date(estimatedDelivery)
+      }
+      
+      order.shippingInfo.shippedAt = new Date()
+    }
+    
+    // Update delivery info if status is delivered
+    if (status === 'delivered') {
+      if (!order.shippingInfo) {
+        order.shippingInfo = {}
+      }
+      order.shippingInfo.deliveredAt = new Date()
+    }
+    
     // Update order status
     const updateNote = note || `Status updated to ${status} by seller: ${req.seller.businessName}`
     await order.updateStatus(status, updateNote, sellerId)
@@ -1260,6 +1289,7 @@ router.put('/orders/:orderId/status', async (req, res) => {
         _id: order._id,
         orderNumber: order.orderNumber,
         status: order.status,
+        shippingInfo: order.shippingInfo,
         user: {
           displayName: order.user?.displayName,
           email: order.user?.email,

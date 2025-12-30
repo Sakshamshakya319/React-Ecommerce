@@ -29,7 +29,7 @@ import Price from '../../components/ui/Price'
 import AddProduct from './AddProduct'
 import EditProduct from './EditProduct'
 import SellerReviewsManagement from '../../components/seller/ReviewsManagement'
-import SellerSettings from './SellerSettings'
+import SellerOrders from './SellerOrders'
 import { getImageUrl, createImageErrorHandler } from '../../utils/imageUtils'
 import toast from 'react-hot-toast'
 
@@ -215,7 +215,7 @@ const SellerDashboard = () => {
               <Route path="/products" element={<SellerProducts />} />
               <Route path="/products/add" element={<AddProduct />} />
               <Route path="/products/edit/:id" element={<EditProduct />} />
-              <Route path="/orders" element={<SellerOrdersComponent />} />
+              <Route path="/orders" element={<SellerOrders />} />
               <Route path="/reviews" element={<SellerReviewsManagement />} />
               <Route path="/analytics" element={<SellerAnalytics />} />
               <Route path="/settings" element={<SellerSettings />} />
@@ -879,32 +879,40 @@ const SellerOrdersComponent = () => {
     fetchOrders()
   }, [statusFilter])
 
-  const updateOrderStatus = async (orderId, newStatus) => {
+  const updateOrderStatus = async (orderId, newStatus, shippingData = {}) => {
     try {
-      console.log('Updating order status:', { orderId, newStatus })
-      const response = await apiClient.put(`/seller/orders/${orderId}/status`, {
+      console.log('Updating order status:', { orderId, newStatus, shippingData })
+      
+      const requestData = {
         status: newStatus,
-        note: `Status updated to ${newStatus}`
-      })
+        note: `Status updated to ${newStatus}`,
+        ...shippingData
+      }
+      
+      const response = await apiClient.put(`/seller/orders/${orderId}/status`, requestData)
       
       if (response.data.success) {
+        const updatedOrder = response.data.order
+        
         // Update the order in the local state
         setOrders(orders.map(order => 
           order._id === orderId 
-            ? { ...order, status: newStatus }
+            ? { ...order, ...updatedOrder }
             : order
         ))
         
         // Update selected order if it's the same one
         if (selectedOrder && selectedOrder._id === orderId) {
-          setSelectedOrder({ ...selectedOrder, status: newStatus })
+          setSelectedOrder({ ...selectedOrder, ...updatedOrder })
         }
         
         toast.success(`Order status updated to ${newStatus}`)
+        return updatedOrder
       }
     } catch (error) {
       console.error('Failed to update order status:', error)
       toast.error('Failed to update order status: ' + (error.response?.data?.message || error.message))
+      throw error
     }
   }
 
@@ -953,38 +961,78 @@ const SellerOrdersComponent = () => {
     return `ORD-${timestamp}-${random}`
   }
 
-  const generatePDF = (order) => {
-    // Create PDF content for seller's items only
-    const pdfContent = `
-      SELLER ORDER DETAILS
-      ===================
+  const downloadPDFInvoice = async (order) => {
+    try {
+      console.log('Downloading PDF invoice for order:', order._id)
       
-      Order ID: ${order.orderNumber || generateOrderId()}
-      Date: ${new Date(order.createdAt).toLocaleDateString()}
-      Status: ${order.status}
+      const response = await apiClient.get(`/orders/${order._id}/pdf-invoice`, {
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/pdf'
+        }
+      })
       
-      CUSTOMER DETAILS:
-      Name: ${order.user?.displayName || 'N/A'}
-      Email: ${order.user?.email || 'N/A'}
-      Phone: ${order.user?.phoneNumber || 'N/A'}
-      Customer ID: ${order.user?.customerId || 'N/A'}
+      console.log('PDF Invoice response received:', response.status)
       
-      SHIPPING ADDRESS:
-      ${order.shippingAddress?.street || 'N/A'}
-      ${order.shippingAddress?.city || 'N/A'}, ${order.shippingAddress?.state || 'N/A'}
-      ${order.shippingAddress?.zipCode || 'N/A'}
+      // Create blob URL and download
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `invoice-${order.orderNumber || order._id}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
       
-      YOUR PRODUCTS IN THIS ORDER:
-      ${order.items?.map(item => 
-        `- ${item.product?.name || 'Product'} x${item.quantity} - ₹${item.price * item.quantity}`
-      ).join('\n') || 'No items'}
+      toast.success('PDF Invoice downloaded successfully!')
+    } catch (error) {
+      console.error('Failed to download PDF invoice:', error)
       
-      YOUR TOTAL: ₹${order.sellerSubtotal || 0}
-      ITEMS COUNT: ${order.sellerItemCount || 0}
+      // Handle different error types
+      if (error.response?.status === 400) {
+        toast.error(error.response.data?.message || 'Invoice is not available for this order status')
+      } else if (error.response?.status === 403) {
+        toast.error('You do not have permission to download this invoice')
+      } else if (error.response?.status === 404) {
+        toast.error('Order not found')
+      } else {
+        toast.error('Failed to download PDF invoice. Please try again.')
+      }
+    }
+  }
+
+  const downloadTextInvoice = (order) => {
+    // Create text content for seller's items only (backup option)
+    const textContent = `
+SELLER ORDER DETAILS
+===================
+
+Order ID: ${order.orderNumber || generateOrderId()}
+Date: ${new Date(order.createdAt).toLocaleDateString()}
+Status: ${order.status}
+
+CUSTOMER DETAILS:
+Name: ${order.user?.displayName || 'N/A'}
+Email: ${order.user?.email || 'N/A'}
+Phone: ${order.user?.phoneNumber || 'N/A'}
+Customer ID: ${order.user?.customerId || 'N/A'}
+
+SHIPPING ADDRESS:
+${order.shippingAddress?.street || 'N/A'}
+${order.shippingAddress?.city || 'N/A'}, ${order.shippingAddress?.state || 'N/A'}
+${order.shippingAddress?.zipCode || 'N/A'}
+
+YOUR PRODUCTS IN THIS ORDER:
+${order.items?.map(item => 
+  `- ${item.product?.name || 'Product'} x${item.quantity} - ₹${item.price * item.quantity}`
+).join('\n') || 'No items'}
+
+YOUR TOTAL: ₹${order.sellerSubtotal || 0}
+ITEMS COUNT: ${order.sellerItemCount || 0}
     `
     
-    // Create and download PDF
-    const blob = new Blob([pdfContent], { type: 'text/plain' })
+    // Create and download text file
+    const blob = new Blob([textContent], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -994,7 +1042,7 @@ const SellerOrdersComponent = () => {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
     
-    toast.success('Order details downloaded')
+    toast.success('Order details downloaded as text file')
   }
 
   if (isLoading) {
@@ -1088,19 +1136,36 @@ const SellerOrdersComponent = () => {
                     <Price amount={order.sellerSubtotal || order.total || 0} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      order.status === 'delivered'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                        : order.status === 'shipped'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                        : order.status === 'processing'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                        : order.status === 'cancelled'
-                        ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-                    }`}>
-                      {order.status || 'pending'}
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        order.status === 'delivered'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                          : order.status === 'shipped'
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                          : order.status === 'processing'
+                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                          : order.status === 'cancelled'
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                          : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+                      }`}>
+                        {order.status || 'pending'}
+                      </span>
+                      
+                      {/* Quick Status Update */}
+                      <select
+                        value={order.status}
+                        onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                        className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                     {new Date(order.createdAt).toLocaleDateString()}
@@ -1116,10 +1181,18 @@ const SellerOrdersComponent = () => {
                     <Button
                       size="small"
                       variant="primary"
-                      onClick={() => generatePDF(order)}
+                      onClick={() => downloadPDFInvoice(order)}
                     >
                       <Download className="h-3 w-3 mr-1" />
                       PDF
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="outline"
+                      onClick={() => downloadTextInvoice(order)}
+                      className="text-xs"
+                    >
+                      TXT
                     </Button>
                   </td>
                 </motion.tr>
@@ -1187,33 +1260,72 @@ const SellerOrdersComponent = () => {
               </div>
               
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">Order Status</h4>
-                <div className="flex items-center space-x-4 mt-2">
-                  <select
-                    value={selectedOrder.status}
-                    onChange={(e) => updateOrderStatus(selectedOrder._id, e.target.value)}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                    selectedOrder.status === 'delivered'
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                      : selectedOrder.status === 'shipped'
-                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                      : selectedOrder.status === 'processing'
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                      : selectedOrder.status === 'cancelled'
-                      ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-                  }`}>
-                    Current: {selectedOrder.status}
-                  </span>
+                <h4 className="font-medium text-gray-900 dark:text-white">Order Status Management</h4>
+                <div className="space-y-4 mt-2">
+                  <div className="flex items-center space-x-4">
+                    <select
+                      value={selectedOrder.status}
+                      onChange={(e) => updateOrderStatus(selectedOrder._id, e.target.value)}
+                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="processing">Processing</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      selectedOrder.status === 'delivered'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                        : selectedOrder.status === 'shipped'
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                        : selectedOrder.status === 'processing'
+                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                        : selectedOrder.status === 'cancelled'
+                        ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+                    }`}>
+                      Current: {selectedOrder.status}
+                    </span>
+                  </div>
+                  
+                  {/* Shipping Information Form */}
+                  {(selectedOrder.status === 'processing' || selectedOrder.status === 'shipped') && (
+                    <ShippingInfoForm 
+                      order={selectedOrder}
+                      onUpdate={(updatedOrder) => {
+                        setSelectedOrder(updatedOrder)
+                        setOrders(orders.map(order => 
+                          order._id === updatedOrder._id ? updatedOrder : order
+                        ))
+                      }}
+                    />
+                  )}
+                  
+                  {/* Display existing shipping info */}
+                  {selectedOrder.shippingInfo && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                      <h5 className="font-medium text-blue-900 dark:text-blue-300 mb-2">Shipping Information</h5>
+                      <div className="text-sm space-y-1">
+                        {selectedOrder.shippingInfo.carrier && (
+                          <div><strong>Carrier:</strong> {selectedOrder.shippingInfo.carrier}</div>
+                        )}
+                        {selectedOrder.shippingInfo.trackingNumber && (
+                          <div><strong>Tracking Number:</strong> {selectedOrder.shippingInfo.trackingNumber}</div>
+                        )}
+                        {selectedOrder.shippingInfo.estimatedDelivery && (
+                          <div><strong>Estimated Delivery:</strong> {new Date(selectedOrder.shippingInfo.estimatedDelivery).toLocaleDateString()}</div>
+                        )}
+                        {selectedOrder.shippingInfo.shippedAt && (
+                          <div><strong>Shipped At:</strong> {new Date(selectedOrder.shippingInfo.shippedAt).toLocaleString()}</div>
+                        )}
+                        {selectedOrder.shippingInfo.deliveredAt && (
+                          <div><strong>Delivered At:</strong> {new Date(selectedOrder.shippingInfo.deliveredAt).toLocaleString()}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -1255,6 +1367,128 @@ const SellerOrdersComponent = () => {
           </motion.div>
         </motion.div>
       )}
+    </div>
+  )
+}
+
+// Shipping Information Form Component
+const ShippingInfoForm = ({ order, onUpdate }) => {
+  const [formData, setFormData] = useState({
+    carrier: order.shippingInfo?.carrier || '',
+    trackingNumber: order.shippingInfo?.trackingNumber || '',
+    estimatedDelivery: order.shippingInfo?.estimatedDelivery 
+      ? new Date(order.shippingInfo.estimatedDelivery).toISOString().split('T')[0] 
+      : ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      const shippingData = {
+        carrier: formData.carrier,
+        trackingNumber: formData.trackingNumber,
+        estimatedDelivery: formData.estimatedDelivery
+      }
+
+      const response = await apiClient.put(`/seller/orders/${order._id}/status`, {
+        status: order.status, // Keep current status
+        note: 'Shipping information updated',
+        ...shippingData
+      })
+
+      if (response.data.success) {
+        onUpdate(response.data.order)
+        toast.success('Shipping information updated successfully')
+      }
+    } catch (error) {
+      console.error('Failed to update shipping info:', error)
+      toast.error('Failed to update shipping information')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  return (
+    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+      <h5 className="font-medium text-gray-900 dark:text-white mb-3">
+        {order.status === 'processing' ? 'Add Shipping Information' : 'Update Shipping Information'}
+      </h5>
+      
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Carrier
+            </label>
+            <select
+              name="carrier"
+              value={formData.carrier}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+            >
+              <option value="">Select Carrier</option>
+              <option value="FedEx">FedEx</option>
+              <option value="UPS">UPS</option>
+              <option value="DHL">DHL</option>
+              <option value="USPS">USPS</option>
+              <option value="Blue Dart">Blue Dart</option>
+              <option value="DTDC">DTDC</option>
+              <option value="Delhivery">Delhivery</option>
+              <option value="Ekart">Ekart</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Tracking Number
+            </label>
+            <input
+              type="text"
+              name="trackingNumber"
+              value={formData.trackingNumber}
+              onChange={handleChange}
+              placeholder="Enter tracking number"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+            />
+          </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Estimated Delivery Date
+          </label>
+          <input
+            type="date"
+            name="estimatedDelivery"
+            value={formData.estimatedDelivery}
+            onChange={handleChange}
+            min={new Date().toISOString().split('T')[0]}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+          />
+        </div>
+        
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            size="small"
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Updating...' : 'Update Shipping Info'}
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }
