@@ -4,6 +4,7 @@ import { apiClient } from '../../api/client'
 import Button from '../ui/Button'
 import LoadingSpinner from '../ui/LoadingSpinner'
 import Price from '../ui/Price'
+import { getImageUrl, createImageErrorHandler } from '../../utils/imageUtils'
 import toast from 'react-hot-toast'
 
 const OrderHistory = () => {
@@ -200,18 +201,16 @@ const OrderHistory = () => {
                     <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0">
                       {item.image ? (
                         <img
-                          src={item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${item.image}`}
+                          src={getImageUrl(item.image)}
                           alt={item.name}
                           className="w-full h-full object-cover rounded-lg"
-                          onError={(e) => {
-                            e.target.style.display = 'none'
-                            e.target.nextSibling.style.display = 'flex'
-                          }}
+                          onError={createImageErrorHandler('Product')}
                         />
-                      ) : null}
-                      <div className="w-full h-full bg-gray-300 rounded-lg flex items-center justify-center text-gray-500 text-xs" style={{ display: item.image ? 'none' : 'flex' }}>
-                        <Package className="h-4 w-4" />
-                      </div>
+                      ) : (
+                        <div className="w-full h-full bg-gray-300 rounded-lg flex items-center justify-center text-gray-500 text-xs">
+                          <Package className="h-4 w-4" />
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex-1 min-w-0">

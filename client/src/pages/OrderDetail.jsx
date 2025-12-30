@@ -7,6 +7,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import Price from '../components/ui/Price'
 import WriteReview from '../components/orders/WriteReview'
 import OrderStatusTracker from '../components/order/OrderStatusTracker'
+import { getImageUrl, createImageErrorHandler } from '../utils/imageUtils'
 import toast from 'react-hot-toast'
 
 const OrderDetail = () => {
@@ -298,18 +299,16 @@ const OrderDetail = () => {
                     <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0">
                       {item.image ? (
                         <img
-                          src={item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${item.image}`}
+                          src={getImageUrl(item.image)}
                           alt={item.name}
                           className="w-full h-full object-cover rounded-lg"
-                          onError={(e) => {
-                            e.target.style.display = 'none'
-                            e.target.nextSibling.style.display = 'flex'
-                          }}
+                          onError={createImageErrorHandler('Product Image')}
                         />
-                      ) : null}
-                      <div className="w-full h-full bg-gray-300 rounded-lg flex items-center justify-center text-gray-500 text-xs" style={{ display: item.image ? 'none' : 'flex' }}>
-                        <Package className="h-6 w-6" />
-                      </div>
+                      ) : (
+                        <div className="w-full h-full bg-gray-300 rounded-lg flex items-center justify-center text-gray-500 text-xs">
+                          <Package className="h-6 w-6" />
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex-1">

@@ -58,13 +58,13 @@ router.post('/image', verifyAnyToken, upload.single('image'), async (req, res) =
       })
     }
 
-    // Return image URL
-    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/products/${req.file.filename}`
+    // Store relative path for consistency across environments
+    const relativePath = `/uploads/products/${req.file.filename}`
 
     res.status(200).json({
       success: true,
       message: 'Image uploaded successfully',
-      url: imageUrl,
+      url: relativePath, // Store relative path
       filename: req.file.filename,
       originalName: req.file.originalname,
       size: req.file.size
@@ -91,9 +91,9 @@ router.post('/product-images', verifyAnyToken, upload.array('images', 5), async 
       })
     }
 
-    // Process uploaded files
+    // Process uploaded files with relative paths
     const imageUrls = req.files.map(file => ({
-      url: `${req.protocol}://${req.get('host')}/uploads/products/${file.filename}`,
+      url: `/uploads/products/${file.filename}`, // Store relative path
       filename: file.filename,
       originalName: file.originalname,
       size: file.size

@@ -408,21 +408,16 @@ const TopProducts = () => {
                 <div className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden">
                   {product.images && product.images[0] ? (
                     <img
-                      src={product.images[0].url}
+                      src={getImageUrl(product.images[0].url)}
                       alt={product.name}
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.style.display = 'none'
-                        e.target.nextSibling.style.display = 'flex'
-                      }}
+                      onError={createImageErrorHandler('Product')}
                     />
-                  ) : null}
-                  <div 
-                    className="w-full h-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center"
-                    style={{ display: product.images?.[0] ? 'none' : 'flex' }}
-                  >
-                    <Package className="h-5 w-5 text-gray-500" />
-                  </div>
+                  ) : (
+                    <div className="w-full h-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                      <Package className="h-5 w-5 text-gray-500" />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">{product.name}</p>
@@ -582,24 +577,15 @@ const SellerProducts = () => {
                         {product.images?.[0] ? (
                           <img
                             className="h-10 w-10 object-cover"
-                            src={product.images[0].url.startsWith('http') 
-                              ? product.images[0].url 
-                              : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${product.images[0].url}`
-                            }
+                            src={getImageUrl(product.images[0].url)}
                             alt={product.name}
-                            onError={(e) => {
-                              console.log('Image failed to load:', product.images[0].url)
-                              e.target.style.display = 'none'
-                              e.target.nextSibling.style.display = 'flex'
-                            }}
+                            onError={createImageErrorHandler('Product')}
                           />
-                        ) : null}
-                        <div 
-                          className="h-10 w-10 bg-gray-300 dark:bg-gray-600 flex items-center justify-center"
-                          style={{ display: product.images?.[0] ? 'none' : 'flex' }}
-                        >
-                          <Package className="h-5 w-5 text-gray-500" />
-                        </div>
+                        ) : (
+                          <div className="h-10 w-10 bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                            <Package className="h-5 w-5 text-gray-500" />
+                          </div>
+                        )}
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">

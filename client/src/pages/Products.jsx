@@ -10,6 +10,7 @@ import { useLanguageStore } from '../store/languageStore'
 import Button from '../components/ui/Button'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import Price from '../components/ui/Price'
+import { getImageUrl, createImageErrorHandler } from '../utils/imageUtils'
 import toast from 'react-hot-toast'
 
 const Products = () => {
@@ -350,23 +351,10 @@ const Products = () => {
                         <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center overflow-hidden">
                           {product.images && product.images.length > 0 ? (
                             <img
-                              src={product.images[0].url.startsWith('http') ? product.images[0].url : `http://localhost:5000${product.images[0].url}`}
+                              src={getImageUrl(product.images[0].url)}
                               alt={product.images[0].alt || product.name}
                               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                              onError={(e) => {
-                                // Use local placeholder instead of external service
-                                const canvas = document.createElement('canvas')
-                                canvas.width = 400
-                                canvas.height = 400
-                                const ctx = canvas.getContext('2d')
-                                ctx.fillStyle = '#6366f1'
-                                ctx.fillRect(0, 0, 400, 400)
-                                ctx.fillStyle = '#ffffff'
-                                ctx.font = '24px Arial'
-                                ctx.textAlign = 'center'
-                                ctx.fillText('Product Image', 200, 200)
-                                e.target.src = canvas.toDataURL()
-                              }}
+                              onError={createImageErrorHandler('Product Image')}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">
