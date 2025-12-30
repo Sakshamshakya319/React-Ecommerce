@@ -220,27 +220,138 @@ router.post('/register', upload.fields([
   }
 })
 
+// Debug route to create a test seller
+router.post('/debug/create-test-seller', async (req, res) => {
+  try {
+    // Check if test seller already exists
+    const existingSeller = await Seller.findOne({ email: 'test@seller.com' })
+    
+    if (existingSeller) {
+      return res.json({
+        success: true,
+        message: 'Test seller already exists',
+        seller: {
+          email: existingSeller.email,
+          businessName: existingSeller.businessName,
+          status: existingSeller.status
+        }
+      })
+    }
+    
+    // Create test seller
+    const testSeller = new Seller({
+      businessName: 'Test Business',
+      businessType: 'individual',
+      ownerName: 'Test Owner',
+      email: 'test@seller.com',
+      phone: '9876543210',
+      password: 'password123',
+      businessAddress: {
+        city: 'Test City',
+        state: 'Test State',
+        pincode: '123456'
+      },
+      businessDescription: 'Test business for debugging',
+      status: 'approved' // Approve immediately for testing
+    })
+    
+    await testSeller.save()
+    
+    res.json({
+      success: true,
+      message: 'Test seller created successfully',
+      seller: {
+        email: testSeller.email,
+        businessName: testSeller.businessName,
+        status: testSeller.status,
+        credentials: {
+          email: 'test@seller.com',
+          password: 'password123'
+        }
+      }
+    })
+    
+  } catch (error) {
+    console.error('Error creating test seller:', error)
+    res.status(500).json({
+      success: false,
+      error: error.message
+    })
+  }
+})
+
+// Debug route to check sellers in database
+router.get('/debug/list-sellers', async (req, res) => {
+  try {
+    const sellers = await Seller.find({}).select('email businessName status createdAt')
+    res.json({
+      success: true,
+      count: sellers.length,
+      sellers: sellers.map(seller => ({
+        id: seller._id,
+        email: seller.email,
+        businessName: seller.businessName,
+        status: seller.status,
+        createdAt: seller.createdAt
+      }))
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    })
+  }
+})
+
 // Seller Login
 // @route   POST /api/seller/login
 // @desc    Seller login
 // @access  Public
 router.post('/login', async (req, res) => {
   try {
+    console.log('=== SELLER LOGIN DEBUG ===')
     const { email, password } = req.body
+    console.log('Login attempt for email:', email)
+    
+    if (!email || !password) {
+      console.log('Missing email or password')
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
+      })
+    }
+    
     const normalizedEmail = String(email || '').trim().toLowerCase()
+    console.log('Normalized email:', normalizedEmail)
     
-    // Find seller by email
+    // Find seller by email with detailed logging
+    console.log('Searching for seller with email:', normalizedEmail)
     const seller = await Seller.findOne({ email: normalizedEmail }).select('+password')
+    console.log('Seller found:', seller ? 'YES' : 'NO')
     
-    if (!seller) {
+    if (seller) {
+      console.log('Seller details:', {
+        id: seller._id,
+        email: seller.email,
+        businessName: seller.businessName,
+        status: seller.status,
+        hasPassword: !!seller.password
+      })
+    } else {
+      // Let's check if there are any sellers at all
+      const allSellers = await Seller.find({}).select('email businessName status')
+      console.log('Total sellers in database:', allSellers.length)
+      console.log('All seller emails:', allSellers.map(s => s.email))
+      
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Invalid credentials - seller not found'
       })
     }
     
     // Check if seller is approved
     if (seller.status !== 'approved') {
+      console.log('Seller status is not approved:', seller.status)
       return res.status(401).json({
         success: false,
         message: `Your seller account is ${seller.status}. Please contact support.`
@@ -248,12 +359,14 @@ router.post('/login', async (req, res) => {
     }
     
     // Verify password
+    console.log('Verifying password...')
     const isPasswordValid = await bcrypt.compare(password, seller.password)
+    console.log('Password valid:', isPasswordValid)
     
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Invalid credentials - password mismatch'
       })
     }
     
@@ -272,6 +385,7 @@ router.post('/login', async (req, res) => {
     // Remove password from response
     seller.password = undefined
     
+    console.log('Login successful for seller:', seller.businessName)
     res.status(200).json({
       success: true,
       message: 'Login successful',
@@ -283,7 +397,8 @@ router.post('/login', async (req, res) => {
     console.error('Seller login error:', error)
     res.status(500).json({
       success: false,
-      message: 'Login failed'
+      message: 'Login failed',
+      error: error.message
     })
   }
 })
