@@ -15,9 +15,9 @@ const OrderHistory = () => {
 
   const statusOptions = [
     { value: 'all', label: 'All Orders' },
-    { value: 'pending', label: 'Pending' },
+    { value: 'pending', label: 'Order Placed' },
     { value: 'confirmed', label: 'Confirmed' },
-    { value: 'processing', label: 'Processing' },
+    { value: 'processing', label: 'Preparing' },
     { value: 'shipped', label: 'Shipped' },
     { value: 'delivered', label: 'Delivered' },
     { value: 'cancelled', label: 'Cancelled' }
@@ -81,6 +81,19 @@ const OrderHistory = () => {
       default:
         return <Package className="h-4 w-4" />
     }
+  }
+
+  const getStatusDisplayName = (status) => {
+    const displayNames = {
+      pending: 'Order Placed',
+      confirmed: 'Confirmed',
+      processing: 'Preparing',
+      shipped: 'Shipped',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled',
+      refunded: 'Refunded'
+    }
+    return displayNames[status] || status.charAt(0).toUpperCase() + status.slice(1)
   }
 
   const handleViewOrder = (orderId) => {
@@ -171,7 +184,7 @@ const OrderHistory = () => {
                   
                   <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                     {getStatusIcon(order.status)}
-                    <span className="ml-1 capitalize">{order.status}</span>
+                    <span className="ml-1">{getStatusDisplayName(order.status)}</span>
                   </div>
                 </div>
                 
