@@ -145,28 +145,35 @@ const Cart = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
-            <CurrencySelector />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Shopping Cart</h1>
+            <div className="sm:hidden">
+              <CurrencySelector />
+            </div>
           </div>
-          <Button
-            variant="outline"
-            onClick={handleClearCart}
-            className="text-red-600 border-red-600 hover:bg-red-50"
-          >
-            Clear Cart
-          </Button>
+          <div className="flex items-center space-x-3">
+            <div className="hidden sm:block">
+              <CurrencySelector />
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleClearCart}
+              className="text-red-600 border-red-600 hover:bg-red-50 text-sm py-2 px-3"
+            >
+              Clear Cart
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-3 sm:space-y-4">
             {items.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <div className="flex items-center space-x-3 sm:space-x-4">
+              <div key={item.id} className="bg-white rounded-lg shadow-md p-3 sm:p-4 lg:p-6">
+                <div className="flex items-start space-x-3 sm:space-x-4">
                   {/* Product Image */}
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
                     <ProductImage 
                       product={item.product}
                       containerClassName="w-full h-full bg-gray-200 rounded-lg"
@@ -178,27 +185,27 @@ const Cart = () => {
                   <div className="flex-1 min-w-0">
                     <Link
                       to={`/products/${item.product._id}`}
-                      className="text-base sm:text-lg font-semibold text-gray-900 hover:text-primary-600 truncate block"
+                      className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 hover:text-primary-600 line-clamp-2 block"
                     >
                       {item.product.name}
                     </Link>
                     
                     {/* Variant Info */}
                     {item.variant && (
-                      <div className="flex items-center space-x-4 mt-1">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mt-1 space-y-1 sm:space-y-0">
                         {item.variant.color && (
                           <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-600">Color:</span>
+                            <span className="text-xs sm:text-sm text-gray-600">Color:</span>
                             <div
-                              className="w-4 h-4 rounded-full border border-gray-300"
+                              className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-gray-300"
                               style={{ backgroundColor: item.variant.color }}
                             ></div>
                           </div>
                         )}
                         {item.variant.material && (
                           <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-600">Material:</span>
-                            <span className="text-sm font-medium capitalize">
+                            <span className="text-xs sm:text-sm text-gray-600">Material:</span>
+                            <span className="text-xs sm:text-sm font-medium capitalize">
                               {item.variant.material}
                             </span>
                           </div>
@@ -206,37 +213,37 @@ const Cart = () => {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between mt-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3 sm:mt-4 space-y-3 sm:space-y-0">
                       {/* Quantity Controls */}
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                          className="p-1 rounded-md hover:bg-gray-100"
+                          className="p-2 rounded-md hover:bg-gray-100 min-w-[36px] min-h-[36px] flex items-center justify-center"
                         >
                           <Minus className="h-4 w-4" />
                         </button>
-                        <span className="w-12 text-center font-medium">
+                        <span className="w-12 text-center font-medium text-sm sm:text-base">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                          className="p-1 rounded-md hover:bg-gray-100"
+                          className="p-2 rounded-md hover:bg-gray-100 min-w-[36px] min-h-[36px] flex items-center justify-center"
                         >
                           <Plus className="h-4 w-4" />
                         </button>
                       </div>
 
                       {/* Price and Remove */}
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center justify-between sm:justify-end sm:space-x-4">
                         <Price 
                           amount={getItemTotal(item)} 
-                          size="lg"
-                          className="text-primary-600"
+                          size="base"
+                          className="text-primary-600 font-semibold"
                           showOriginal={true}
                         />
                         <button
                           onClick={() => handleRemoveItem(item.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-md"
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-md min-w-[36px] min-h-[36px] flex items-center justify-center"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -281,7 +288,7 @@ const Cart = () => {
                 
                 <hr className="my-4" />
                 
-                <div className="flex justify-between text-lg sm:text-xl font-semibold">
+                <div className="flex justify-between text-base sm:text-lg lg:text-xl font-semibold">
                   <span>Total</span>
                   <Price 
                     amount={getFinalTotal()} 
@@ -294,7 +301,7 @@ const Cart = () => {
               {/* Shipping Notice */}
               {getShippingCost() > 0 && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
-                  <p className="text-sm text-blue-800">
+                  <p className="text-xs sm:text-sm text-blue-800">
                     Add <Price amount={500 - getSubtotal()} className="inline font-semibold" /> more for free shipping!
                   </p>
                 </div>
@@ -305,15 +312,15 @@ const Cart = () => {
                 variant="primary"
                 size="large"
                 onClick={handleCheckout}
-                className="w-full mb-4"
+                className="w-full mb-4 py-3 text-sm sm:text-base"
               >
                 Proceed to Checkout
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
 
               {/* Continue Shopping */}
               <Link to="/products">
-                <Button variant="outline" size="large" className="w-full">
+                <Button variant="outline" size="large" className="w-full py-3 text-sm sm:text-base">
                   Continue Shopping
                 </Button>
               </Link>

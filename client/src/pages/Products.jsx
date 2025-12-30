@@ -232,20 +232,20 @@ const Products = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('products')}</h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('products')}</h1>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
               Discover our collection of products
             </p>
           </div>
           
           {/* View Controls */}
-          <div className="flex items-center space-x-4 mt-4 md:mt-0">
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-between w-full sm:w-auto gap-3">
+            <div className="flex items-center space-x-1 sm:space-x-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-2 sm:p-2.5 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center ${
                   viewMode === 'grid' 
                     ? 'bg-primary-600 text-white' 
                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -255,7 +255,7 @@ const Products = () => {
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-2 sm:p-2.5 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center ${
                   viewMode === 'list' 
                     ? 'bg-primary-600 text-white' 
                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -268,7 +268,7 @@ const Products = () => {
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
-              className="md:hidden"
+              className="lg:hidden py-2 px-3 text-sm min-h-[40px]"
             >
               <Filter className="h-4 w-4 mr-2" />
               Filters
@@ -279,12 +279,12 @@ const Products = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
           <div className={`lg:w-64 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md sticky top-4 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md sticky top-4 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-4 lg:hidden">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filters</h3>
                 <button
                   onClick={() => setShowFilters(false)}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 dark:text-gray-400"
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-500 dark:text-gray-400 min-w-[32px] min-h-[32px] flex items-center justify-center"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -296,8 +296,8 @@ const Products = () => {
           {/* Products Grid */}
           <div className="flex-1">
             {/* Results Info */}
-            <div className="flex justify-between items-center mb-6">
-              <p className="text-gray-600 dark:text-gray-400">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Showing {products.length} of {pagination.total} products
               </p>
             </div>
@@ -327,8 +327,8 @@ const Products = () => {
                 {/* Products */}
                 <div className={`
                   ${viewMode === 'grid' 
-                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' 
-                    : 'space-y-4'
+                    ? 'grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6' 
+                    : 'space-y-3 sm:space-y-4'
                   }
                 `}>
                   {products.map((product) => (

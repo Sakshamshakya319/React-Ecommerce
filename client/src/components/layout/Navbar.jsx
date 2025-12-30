@@ -94,12 +94,16 @@ const Navbar = () => {
           </div>
 
           {/* Right side items */}
-          <div className="flex items-center space-x-3">
-            {/* Language Selector */}
-            <LanguageSelector />
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Language Selector - Hidden on mobile */}
+            <div className="hidden sm:block">
+              <LanguageSelector />
+            </div>
             
-            {/* Theme Switcher */}
-            <ThemeSwitcher />
+            {/* Theme Switcher - Hidden on mobile */}
+            <div className="hidden sm:block">
+              <ThemeSwitcher />
+            </div>
 
             {/* Currency Selector - Desktop only */}
             <div className="hidden md:block">
@@ -113,7 +117,7 @@ const Navbar = () => {
                 <input
                   type="text"
                   placeholder={t('search')}
-                  className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-64 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                  className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-full md:w-48 lg:w-64 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       navigate(`/products?search=${e.target.value}`)
@@ -126,12 +130,12 @@ const Navbar = () => {
             {/* Cart */}
             <Link
               to="/cart"
-              className="relative p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
+              className="relative p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
-              <ShoppingCart className="h-6 w-6" />
+              <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
               {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-600 dark:bg-primary-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartItemCount}
+                <span className="absolute -top-0.5 -right-0.5 bg-primary-600 dark:bg-primary-500 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center text-[10px] sm:text-xs">
+                  {cartItemCount > 99 ? '99+' : cartItemCount}
                 </span>
               )}
             </Link>
@@ -140,12 +144,12 @@ const Navbar = () => {
             {isUserAuthenticated && (
               <Link
                 to="/wishlist"
-                className="relative p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
+                className="relative p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
-                <Heart className="h-6 w-6" />
+                <Heart className="h-5 w-5 sm:h-6 sm:w-6" />
                 {user?.wishlist && user.wishlist.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {user.wishlist.length}
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center text-[10px] sm:text-xs">
+                    {user.wishlist.length > 99 ? '99+' : user.wishlist.length}
                   </span>
                 )}
               </Link>
@@ -290,7 +294,7 @@ const Navbar = () => {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-gray-700 hover:text-primary-600"
+              className="md:hidden p-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
               {isMobileMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -303,16 +307,16 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
-            <div className="space-y-2">
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4">
+            <div className="space-y-1">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  className={`block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
                     isActivePath(item.href)
-                      ? 'text-primary-600 bg-primary-50'
-                      : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                      ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -321,13 +325,13 @@ const Navbar = () => {
               ))}
               
               {/* Mobile Search */}
-              <div className="px-3 py-2">
+              <div className="px-4 py-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                   <input
                     type="text"
-                    placeholder="Search products..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder={t('search')}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
                         navigate(`/products?search=${e.target.value}`)
@@ -338,14 +342,22 @@ const Navbar = () => {
                 </div>
               </div>
 
-              {/* Mobile Currency Selector */}
-              <div className="px-3 py-2">
-                <CurrencySelector />
+              {/* Mobile Language Selector */}
+              <div className="px-4 py-2">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Language</div>
+                <LanguageSelector />
               </div>
 
               {/* Mobile Theme Switcher */}
-              <div className="px-3 py-2">
+              <div className="px-4 py-2">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Theme</div>
                 <ThemeSwitcher />
+              </div>
+
+              {/* Mobile Currency Selector */}
+              <div className="px-4 py-2">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Currency</div>
+                <CurrencySelector />
               </div>
             </div>
           </div>
