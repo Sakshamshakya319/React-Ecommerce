@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { sendSellerApprovalEmail, sendSellerRejectionEmail } = require('../utils/emailService')
 const emailService = require('../services/emailService')
-const { verifyToken, requireAdmin } = require('../middleware/auth')
 const { 
   validateProduct, 
   validateProductUpdate, 

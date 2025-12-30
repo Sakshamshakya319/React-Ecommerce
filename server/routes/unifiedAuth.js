@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const admin = require('firebase-admin')
 const User = require('../models/User')
 const Seller = require('../models/Seller')
-// const unifiedEmailService = require('../services/unifiedEmailService') // Disabled to prevent timeout
+const unifiedEmailService = require('../services/unifiedEmailService')
 
 const router = express.Router()
 
@@ -16,8 +16,6 @@ router.get('/test', (req, res) => {
     timestamp: new Date().toISOString()
   })
 })
-
-module.exports = router
 
 // @route   POST /api/unified-auth/forgot-password
 // @desc    Smart forgot password - detects user type automatically

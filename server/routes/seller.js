@@ -8,6 +8,7 @@ const Seller = require('../models/Seller')
 const Product = require('../models/Product')
 const Order = require('../models/Order')
 const { validateObjectId, validatePagination } = require('../middleware/validation')
+const { verifyToken } = require('../middleware/auth')
 const emailService = require('../services/emailService')
 
 const router = express.Router()
