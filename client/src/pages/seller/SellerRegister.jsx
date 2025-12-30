@@ -11,6 +11,8 @@ const SellerRegister = () => {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [isPincodeLoading, setIsPincodeLoading] = useState(false)
+  const [pincodeStatus, setPincodeStatus] = useState('idle') // idle, loading, success, error
+  const [pincodeMessage, setPincodeMessage] = useState('')
   const [formData, setFormData] = useState({
     // Business Information
     businessName: '',
@@ -115,6 +117,8 @@ const SellerRegister = () => {
     // Auto-fill city and state if pincode is 6 digits
     if (pincode.length === 6 && /^\d{6}$/.test(pincode)) {
       setIsPincodeLoading(true)
+      setPincodeStatus('loading')
+      setPincodeMessage('Looking up pincode...')
       try {
         const response = await apiClient.get(`/pincode/${pincode}`)
         
@@ -130,10 +134,14 @@ const SellerRegister = () => {
             }
           }))
           
+          setPincodeStatus('success')
+          setPincodeMessage(`${city}, ${state}`)
           toast.success(`Auto-filled: ${city}, ${state}`)
         }
       } catch (error) {
         console.error('Pincode lookup error:', error)
+        setPincodeStatus('error')
+        setPincodeMessage('Unable to fetch location data. Please enter city/state manually.')
         // Don't show error toast for pincode lookup failures
         // as it's just a convenience feature
       } finally {
@@ -257,7 +265,16 @@ const SellerRegister = () => {
       navigate('/')
     } catch (error) {
       console.error('Registration error:', error)
-      toast.error(error.response?.data?.message || 'Registration failed. Please try again.')
+      const serverMessage = error.response?.data?.message
+      const serverErrors = error.response?.data?.errors
+      
+      if (Array.isArray(serverErrors) && serverErrors.length > 0) {
+        serverErrors.slice(0, 4).forEach(err => {
+          toast.error(`${err.field}: ${err.message}`)
+        })
+      } else {
+        toast.error(serverMessage || 'Registration failed. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -486,8 +503,16 @@ const SellerRegister = () => {
                         </div>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      City and state will be auto-filled
+                    <p className={`text-xs mt-1 ${
+                      pincodeStatus === 'success' ? 'text-green-600' :
+                      pincodeStatus === 'error' ? 'text-red-600' :
+                      'text-gray-500 dark:text-gray-400'
+                    }`}>
+                      {pincodeStatus === 'success'
+                        ? 'City and state auto-filled'
+                        : pincodeStatus === 'error'
+                          ? 'API failed. Enter city and state manually.'
+                          : 'City and state will be auto-filled'}
                     </p>
                   </div>
                   <div></div>
@@ -499,9 +524,15 @@ const SellerRegister = () => {
                       type="text"
                       name="businessAddress.city"
                       value={formData.businessAddress.city}
-                      className="input-field bg-gray-100 dark:bg-gray-700 cursor-not-allowed"
-                      placeholder="Auto-filled from pincode"
-                      readOnly
+                      className={`input-field ${
+                        pincodeStatus === 'success'
+                          ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
+                          : pincodeStatus === 'error'
+                            ? ''
+                            : 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
+                      }`}
+                      placeholder={pincodeStatus === 'error' ? 'Enter city manually' : 'Auto-filled from pincode'}
+                      readOnly={pincodeStatus !== 'error'}
                       required
                     />
                   </div>
@@ -513,9 +544,15 @@ const SellerRegister = () => {
                       type="text"
                       name="businessAddress.state"
                       value={formData.businessAddress.state}
-                      className="input-field bg-gray-100 dark:bg-gray-700 cursor-not-allowed"
-                      placeholder="Auto-filled from pincode"
-                      readOnly
+                      className={`input-field ${
+                        pincodeStatus === 'success'
+                          ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
+                          : pincodeStatus === 'error'
+                            ? ''
+                            : 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
+                      }`}
+                      placeholder={pincodeStatus === 'error' ? 'Enter state manually' : 'Auto-filled from pincode'}
+                      readOnly={pincodeStatus !== 'error'}
                       required
                     />
                   </div>

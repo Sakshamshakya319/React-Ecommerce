@@ -13,7 +13,7 @@ const API_BASE =
 
 export const apiClient = axios.create({
   baseURL: API_BASE,
-  timeout: 10000,
+  timeout: 20000,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -122,6 +122,20 @@ apiClient.interceptors.response.use(
         window.location.href = '/login'
         return Promise.reject(refreshError)
       }
+    }
+    
+    // Network/timeout retry logic
+    if ((error.code === 'ECONNABORTED' || !error.response) && originalRequest && originalRequest.method) {
+      originalRequest._retryCount = (originalRequest._retryCount || 0) + 1
+      
+      if (originalRequest._retryCount <= 2) {
+        const backoffMs = 800 * originalRequest._retryCount
+        console.warn(`Network/timeout error. Retrying (${originalRequest._retryCount}/2) after ${backoffMs}ms:`, originalRequest.url)
+        await new Promise(resolve => setTimeout(resolve, backoffMs))
+        return apiClient(originalRequest)
+      }
+      
+      toast.error('Network timeout. Please try again.')
     }
     
     // Handle other errors

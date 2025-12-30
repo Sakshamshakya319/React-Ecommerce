@@ -77,7 +77,7 @@ const AddressForm = ({
       } else if (error.response?.status === 408) {
         setPincodeMessage('Request timeout. Please try again.')
       } else {
-        setPincodeMessage('Unable to fetch location data. Please enter manually.')
+        setPincodeMessage('Unable to fetch location data. Please enter city/state manually.')
       }
       
       // Don't clear the fields, let user enter manually

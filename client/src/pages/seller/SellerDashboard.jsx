@@ -40,10 +40,13 @@ const useSellerAuth = () => {
   
   useEffect(() => {
     initializeSellerAuth()
+  }, [initializeSellerAuth])
+  
+  useEffect(() => {
     if (!isLoading && !isSellerAuthenticated) {
       navigate('/seller/login')
     }
-  }, [navigate, isSellerAuthenticated, isLoading, initializeSellerAuth])
+  }, [navigate, isSellerAuthenticated, isLoading])
   
   return isSellerAuthenticated
 }

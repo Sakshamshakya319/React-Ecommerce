@@ -38,10 +38,13 @@ const useAdminAuth = () => {
   
   useEffect(() => {
     initializeAdminAuth()
+  }, [initializeAdminAuth])
+  
+  useEffect(() => {
     if (!isLoading && !isAdminAuthenticated) {
       navigate('/admin/login')
     }
-  }, [navigate, isAdminAuthenticated, isLoading, initializeAdminAuth])
+  }, [navigate, isAdminAuthenticated, isLoading])
   
   return isAdminAuthenticated
 }

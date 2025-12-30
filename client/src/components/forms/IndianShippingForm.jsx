@@ -75,11 +75,11 @@ const IndianShippingForm = ({
       setPincodeStatus('error')
       setIsAutoFilled(false)
       
-      // Clear city and state on error
+      // Allow manual entry when lookup fails
       setFormData(prev => ({
         ...prev,
-        city: '',
-        state: ''
+        city: prev.city || '',
+        state: prev.state || ''
       }))
       
       if (error.response?.status === 404) {
@@ -97,8 +97,12 @@ const IndianShippingForm = ({
   const handleInputChange = (e) => {
     const { name, value } = e.target
     
-    // Only allow changes to street and zipCode
-    if (name === 'street' || name === 'zipCode') {
+    // Allow manual changes when not auto-filled
+    if (
+      name === 'street' || 
+      name === 'zipCode' || 
+      (pincodeStatus === 'error' && (name === 'city' || name === 'state'))
+    ) {
       setFormData(prev => ({
         ...prev,
         [name]: name === 'zipCode' ? value.replace(/\D/g, '').slice(0, 6) : value
@@ -120,8 +124,8 @@ const IndianShippingForm = ({
       return
     }
 
-    if (!formData.city || !formData.state) {
-      toast.error('Please enter a valid pincode to auto-fill city and state')
+    if (!formData.city?.trim() || !formData.state?.trim()) {
+      toast.error('Please provide city and state (auto-filled or manual)')
       return
     }
 
@@ -229,21 +233,23 @@ const IndianShippingForm = ({
                 name="city"
                 required
                 value={formData.city}
-                readOnly
+                readOnly={pincodeStatus !== 'error'}
                 className={`w-full px-3 py-2 pr-10 border rounded-lg ${
-                  isAutoFilled 
-                    ? 'bg-green-50 border-green-300 text-green-800' 
-                    : 'bg-gray-50 border-gray-300 text-gray-500'
-                } cursor-not-allowed`}
-                placeholder="Auto-filled from pincode"
+                  pincodeStatus === 'success'
+                    ? 'bg-green-50 border-green-300 text-green-800 cursor-not-allowed' 
+                    : pincodeStatus === 'error'
+                      ? 'bg-white border-gray-300 text-gray-900'
+                      : 'bg-gray-50 border-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                placeholder={pincodeStatus === 'error' ? 'Enter city manually' : 'Auto-filled from pincode'}
               />
-              {isAutoFilled && (
+              {pincodeStatus === 'success' && (
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <Lock className="h-4 w-4 text-green-500" />
                 </div>
               )}
             </div>
-            {isAutoFilled && (
+            {pincodeStatus === 'success' && (
               <div className="mt-1 text-xs text-green-600 flex items-center space-x-1">
                 <CheckCircle className="h-3 w-3" />
                 <span>Auto-filled and locked</span>
@@ -263,21 +269,23 @@ const IndianShippingForm = ({
                 name="state"
                 required
                 value={formData.state}
-                readOnly
+                readOnly={pincodeStatus !== 'error'}
                 className={`w-full px-3 py-2 pr-10 border rounded-lg ${
-                  isAutoFilled 
-                    ? 'bg-green-50 border-green-300 text-green-800' 
-                    : 'bg-gray-50 border-gray-300 text-gray-500'
-                } cursor-not-allowed`}
-                placeholder="Auto-filled from pincode"
+                  pincodeStatus === 'success'
+                    ? 'bg-green-50 border-green-300 text-green-800 cursor-not-allowed' 
+                    : pincodeStatus === 'error'
+                      ? 'bg-white border-gray-300 text-gray-900'
+                      : 'bg-gray-50 border-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                placeholder={pincodeStatus === 'error' ? 'Enter state manually' : 'Auto-filled from pincode'}
               />
-              {isAutoFilled && (
+              {pincodeStatus === 'success' && (
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <Lock className="h-4 w-4 text-green-500" />
                 </div>
               )}
             </div>
-            {isAutoFilled && (
+            {pincodeStatus === 'success' && (
               <div className="mt-1 text-xs text-green-600 flex items-center space-x-1">
                 <CheckCircle className="h-3 w-3" />
                 <span>Auto-filled and locked</span>
@@ -302,7 +310,7 @@ const IndianShippingForm = ({
             type="submit"
             variant="primary"
             isLoading={isLoading}
-            disabled={isLoading || !isAutoFilled}
+            disabled={isLoading || !(isAutoFilled || pincodeStatus === 'error')}
           >
             Save Address
           </Button>

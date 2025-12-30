@@ -158,8 +158,8 @@ const CheckoutAddressForm = ({ onAddressSubmit, isLoading = false }) => {
       return
     }
 
-    if (!shippingAddress.city || !shippingAddress.state) {
-      toast.error('Please enter a valid shipping pincode to auto-fill city and state')
+    if (!shippingAddress.city?.trim() || !shippingAddress.state?.trim()) {
+      toast.error('Please provide shipping city and state (auto-filled or manual)')
       return
     }
 
@@ -176,7 +176,7 @@ const CheckoutAddressForm = ({ onAddressSubmit, isLoading = false }) => {
       }
 
       if (!billingAddress.city || !billingAddress.state) {
-        toast.error('Please enter a valid billing pincode to auto-fill city and state')
+        toast.error('Please provide billing city and state (auto-filled or manual)')
         return
       }
     }
@@ -242,7 +242,7 @@ const CheckoutAddressForm = ({ onAddressSubmit, isLoading = false }) => {
             )}
           </div>
 
-          {/* City and State - Auto-filled and Locked */}
+          {/* City and State - Auto-fill when available; allow manual input when lookup fails */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -253,15 +253,18 @@ const CheckoutAddressForm = ({ onAddressSubmit, isLoading = false }) => {
                   type="text"
                   required
                   value={shippingAddress.city}
-                  readOnly
+                  onChange={(e) => setShippingAddress(prev => ({ ...prev, city: e.target.value }))}
+                  readOnly={shippingPincodeStatus !== 'error'}
                   className={`w-full px-3 py-2 pr-10 border rounded-lg ${
-                    shippingAutoFilled 
-                      ? 'bg-green-50 border-green-300 text-green-800' 
-                      : 'bg-gray-50 border-gray-300 text-gray-500'
-                  } cursor-not-allowed`}
-                  placeholder="Auto-filled from pincode (e.g., Mumbai, Delhi, Bangalore)"
+                    shippingPincodeStatus === 'success'
+                      ? 'bg-green-50 border-green-300 text-green-800 cursor-not-allowed'
+                      : shippingPincodeStatus === 'error'
+                        ? 'bg-white border-gray-300 text-gray-900'
+                        : 'bg-gray-50 border-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                  placeholder={shippingPincodeStatus === 'error' ? 'Enter city manually' : 'Auto-filled from pincode'}
                 />
-                {shippingAutoFilled && (
+                {shippingPincodeStatus === 'success' && (
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                     <Lock className="h-4 w-4 text-green-500" />
                   </div>
@@ -278,15 +281,18 @@ const CheckoutAddressForm = ({ onAddressSubmit, isLoading = false }) => {
                   type="text"
                   required
                   value={shippingAddress.state}
-                  readOnly
+                  onChange={(e) => setShippingAddress(prev => ({ ...prev, state: e.target.value }))}
+                  readOnly={shippingPincodeStatus !== 'error'}
                   className={`w-full px-3 py-2 pr-10 border rounded-lg ${
-                    shippingAutoFilled 
-                      ? 'bg-green-50 border-green-300 text-green-800' 
-                      : 'bg-gray-50 border-gray-300 text-gray-500'
-                  } cursor-not-allowed`}
-                  placeholder="Auto-filled from pincode (e.g., Maharashtra, Delhi, Karnataka)"
+                    shippingPincodeStatus === 'success'
+                      ? 'bg-green-50 border-green-300 text-green-800 cursor-not-allowed'
+                      : shippingPincodeStatus === 'error'
+                        ? 'bg-white border-gray-300 text-gray-900'
+                        : 'bg-gray-50 border-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                  placeholder={shippingPincodeStatus === 'error' ? 'Enter state manually' : 'Auto-filled from pincode'}
                 />
-                {shippingAutoFilled && (
+                {shippingPincodeStatus === 'success' && (
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                     <Lock className="h-4 w-4 text-green-500" />
                   </div>
@@ -359,7 +365,7 @@ const CheckoutAddressForm = ({ onAddressSubmit, isLoading = false }) => {
               )}
             </div>
 
-            {/* City and State - Auto-filled and Locked */}
+            {/* City and State - Auto-fill when available; allow manual input when lookup fails */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -370,15 +376,18 @@ const CheckoutAddressForm = ({ onAddressSubmit, isLoading = false }) => {
                     type="text"
                     required
                     value={billingAddress.city}
-                    readOnly
+                    onChange={(e) => setBillingAddress(prev => ({ ...prev, city: e.target.value }))}
+                    readOnly={billingPincodeStatus !== 'error'}
                     className={`w-full px-3 py-2 pr-10 border rounded-lg ${
-                      billingAutoFilled 
-                        ? 'bg-green-50 border-green-300 text-green-800' 
-                        : 'bg-gray-50 border-gray-300 text-gray-500'
-                    } cursor-not-allowed`}
-                    placeholder="Auto-filled from pincode (e.g., Mumbai, Delhi, Bangalore)"
+                      billingPincodeStatus === 'success'
+                        ? 'bg-green-50 border-green-300 text-green-800 cursor-not-allowed' 
+                        : billingPincodeStatus === 'error'
+                          ? 'bg-white border-gray-300 text-gray-900'
+                          : 'bg-gray-50 border-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                    placeholder={billingPincodeStatus === 'error' ? 'Enter city manually' : 'Auto-filled from pincode'}
                   />
-                  {billingAutoFilled && (
+                  {billingPincodeStatus === 'success' && (
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                       <Lock className="h-4 w-4 text-green-500" />
                     </div>
@@ -395,15 +404,18 @@ const CheckoutAddressForm = ({ onAddressSubmit, isLoading = false }) => {
                     type="text"
                     required
                     value={billingAddress.state}
-                    readOnly
+                    onChange={(e) => setBillingAddress(prev => ({ ...prev, state: e.target.value }))}
+                    readOnly={billingPincodeStatus !== 'error'}
                     className={`w-full px-3 py-2 pr-10 border rounded-lg ${
-                      billingAutoFilled 
-                        ? 'bg-green-50 border-green-300 text-green-800' 
-                        : 'bg-gray-50 border-gray-300 text-gray-500'
-                    } cursor-not-allowed`}
-                    placeholder="Auto-filled from pincode (e.g., Maharashtra, Delhi, Karnataka)"
+                      billingPincodeStatus === 'success'
+                        ? 'bg-green-50 border-green-300 text-green-800 cursor-not-allowed' 
+                        : billingPincodeStatus === 'error'
+                          ? 'bg-white border-gray-300 text-gray-900'
+                          : 'bg-gray-50 border-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                    placeholder={billingPincodeStatus === 'error' ? 'Enter state manually' : 'Auto-filled from pincode'}
                   />
-                  {billingAutoFilled && (
+                  {billingPincodeStatus === 'success' && (
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                       <Lock className="h-4 w-4 text-green-500" />
                     </div>
@@ -422,7 +434,19 @@ const CheckoutAddressForm = ({ onAddressSubmit, isLoading = false }) => {
           variant="primary"
           size="large"
           isLoading={isLoading}
-          disabled={isLoading || !shippingAutoFilled || (!sameAsShipping && !billingAutoFilled)}
+          disabled={
+            isLoading ||
+            !shippingAddress.street?.trim() ||
+            shippingAddress.zipCode?.length !== 6 ||
+            !shippingAddress.city?.trim() ||
+            !shippingAddress.state?.trim() ||
+            (!sameAsShipping && (
+              !billingAddress.street?.trim() ||
+              billingAddress.zipCode?.length !== 6 ||
+              !billingAddress.city?.trim() ||
+              !billingAddress.state?.trim()
+            ))
+          }
         >
           Continue to Payment
         </Button>
